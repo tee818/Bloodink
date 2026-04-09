@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,6 +249,7 @@ html, body {
   font-size: 14px;
   cursor: pointer;
   text-align: left;
+  margin-bottom: 8px;
 }
 
 .sidebar-content {
@@ -282,6 +282,35 @@ html, body {
 .sidebar-footer {
   padding: 20px;
   border-top: 1px solid var(--border);
+}
+
+/* MEMORY BADGE */
+.memory-badge {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: none;
+  z-index: 50;
+}
+
+.memory-badge.visible {
+  display: block;
+}
+
+.memory-tag {
+  display: inline-block;
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin: 0 4px;
+  font-size: 11px;
 }
 
 /* MESSAGES */
@@ -417,7 +446,7 @@ html, body {
   fill: currentColor;
 }
 
-/* SETTINGS MODAL */
+/* MODALS */
 .modal {
   position: fixed;
   inset: 0;
@@ -462,7 +491,7 @@ html, body {
   color: var(--text-secondary);
 }
 
-.form-input, .form-textarea {
+.form-input, .form-textarea, .form-select {
   width: 100%;
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
@@ -475,10 +504,9 @@ html, body {
 }
 
 .form-textarea {
-  min-height: 150px;
+  min-height: 100px;
   resize: vertical;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 12px;
+  font-family: inherit;
 }
 
 .form-input::placeholder, .form-textarea::placeholder {
@@ -512,6 +540,84 @@ html, body {
   font-weight: 500;
   cursor: pointer;
 }
+
+.btn-danger {
+  background: #c75353;
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* MEMORY LIST */
+.memory-list {
+  margin-top: 20px;
+}
+
+.memory-item {
+  background: var(--bg-tertiary);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.memory-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.memory-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.memory-item-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.memory-item-keywords {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.keyword-badge {
+  background: var(--bg-secondary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.memory-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-small {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.btn-small:hover {
+  color: var(--text-primary);
+}
+
+.priority-high { color: #c75353; }
+.priority-medium { color: #c7a853; }
+.priority-low { color: #53c793; }
 
 /* TOAST */
 .toast {
@@ -570,6 +676,8 @@ html, body {
   </div>
 
   <div class="messages-container" id="messagesContainer"></div>
+  
+  <div class="memory-badge" id="memoryBadge"></div>
 
   <div class="input-area">
     <div class="input-wrapper">
@@ -590,6 +698,7 @@ html, body {
   <div class="sidebar-header">
     <div class="sidebar-title">Conversations</div>
     <button class="sidebar-btn" onclick="createNewChat(); toggleSidebar()">+ New chat</button>
+    <button class="sidebar-btn" onclick="openMemories()">🧠 Memories</button>
   </div>
   <div class="sidebar-content" id="chatList"></div>
   <div class="sidebar-footer">
@@ -609,7 +718,7 @@ html, body {
 
     <div class="form-group">
       <label class="form-label">System Prompt (Bloodink's personality)</label>
-      <textarea class="form-textarea" id="systemPromptInput"></textarea>
+      <textarea class="form-textarea" id="systemPromptInput" style="min-height: 150px; font-family: monospace; font-size: 12px;"></textarea>
     </div>
 
     <div class="form-group">
@@ -623,9 +732,74 @@ html, body {
       </select>
     </div>
 
+    <div class="form-group">
+      <label class="form-label">Max Memories per Message</label>
+      <input type="number" class="form-input" id="maxMemoriesInput" min="1" max="10" value="3">
+    </div>
+
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
       <button class="btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORIES MODAL -->
+<div class="modal" id="memoriesModal">
+  <div class="modal-content">
+    <div class="modal-header">Memories</div>
+    
+    <button class="btn-primary" onclick="openMemoryEditor(null)" style="margin-bottom: 20px; width: 100%;">+ Create Memory</button>
+    
+    <div class="memory-list" id="memoryList"></div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeMemories()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY EDITOR MODAL -->
+<div class="modal" id="memoryEditorModal">
+  <div class="modal-content">
+    <div class="modal-header" id="memoryEditorTitle">Create Memory</div>
+    
+    <div class="form-group">
+      <label class="form-label">Memory Name</label>
+      <input type="text" class="form-input" id="memoryNameInput" placeholder="e.g., Writing style, Character details">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Content</label>
+      <textarea class="form-textarea" id="memoryContentInput" placeholder="What should Bloodink remember?"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Keywords (comma-separated)</label>
+      <input type="text" class="form-input" id="memoryKeywordsInput" placeholder="writing, characters, Sephy, Rhia">
+      <small style="color: var(--text-muted); font-size: 12px;">Memory will be used when these words appear in your messages</small>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <select class="form-input" id="memoryPriorityInput">
+        <option value="high">High</option>
+        <option value="medium" selected>Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <input type="checkbox" id="memoryPinnedInput" style="margin-right: 8px;">
+        Pinned (always included)
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeMemoryEditor()">Cancel</button>
+      <button class="btn-danger" id="deleteMemoryBtn" onclick="deleteMemory()" style="display: none;">Delete</button>
+      <button class="btn-primary" onclick="saveMemory()">Save</button>
     </div>
   </div>
 </div>
@@ -670,11 +844,14 @@ let state = {
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   model: 'openai/gpt-4o',
   theme: 'dark',
+  maxMemories: 3,
   chats: [],
+  memories: [],
   activeChatId: null,
   isFirstLaunch: true
 };
 
+let currentMemoryId = null;
 let recognition = null;
 
 // INIT
@@ -683,7 +860,6 @@ function init() {
   applyTheme();
   renderChatList();
   
-  // Auto-resize textarea
   const input = document.getElementById('inputField');
   input.addEventListener('input', function() {
     this.style.height = 'auto';
@@ -691,7 +867,6 @@ function init() {
     document.getElementById('sendButton').disabled = !this.value.trim();
   });
   
-  // Enter to send
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -699,7 +874,6 @@ function init() {
     }
   });
 
-  // Check if first launch
   if (state.isFirstLaunch) {
     // Show welcome screen
   } else {
@@ -713,7 +887,6 @@ function startApp() {
   state.isFirstLaunch = false;
   saveState();
   
-  // Create first chat if none exist
   if (state.chats.length === 0) {
     createNewChat();
   } else {
@@ -793,60 +966,96 @@ function renderMessages() {
   container.scrollTop = container.scrollHeight;
 }
 
-async function sendMessage() {
-  console.log('sendMessage called');
-  const input = document.getElementById('inputField');
-  const content = input.value.trim();
-  console.log('Message content:', content);
-  if (!content) {
-    console.log('No content, returning');
+// MEMORY SYSTEM
+function getRelevantMemories(userMessage) {
+  const normalize = text => text.toLowerCase().trim();
+  const msgNorm = normalize(userMessage);
+  
+  const pinned = [];
+  const matched = [];
+  
+  state.memories.forEach(mem => {
+    if (mem.pinned) {
+      pinned.push(mem);
+      return;
+    }
+    
+    const keywords = (mem.keywords || []).map(normalize);
+    if (keywords.some(kw => kw && msgNorm.includes(kw))) {
+      matched.push(mem);
+    }
+  });
+  
+  // Sort by priority
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+  matched.sort((a, b) => (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1));
+  
+  const maxMem = state.maxMemories || 3;
+  const remaining = Math.max(0, maxMem - pinned.length);
+  
+  return [...pinned, ...matched.slice(0, remaining)];
+}
+
+function showMemoryBadge(memories) {
+  const badge = document.getElementById('memoryBadge');
+  if (memories.length === 0) {
+    badge.classList.remove('visible');
     return;
   }
   
+  badge.innerHTML = '🧠 ' + memories.map(m => {
+    const icon = m.pinned ? '📌' : (m.priority === 'high' ? '🔴' : m.priority === 'low' ? '🟢' : '🟡');
+    return `<span class="memory-tag">${icon} ${escapeHtml(m.name)}</span>`;
+  }).join('');
+  
+  badge.classList.add('visible');
+  setTimeout(() => badge.classList.remove('visible'), 5000);
+}
+
+async function sendMessage() {
+  const input = document.getElementById('inputField');
+  const content = input.value.trim();
+  if (!content) return;
+  
   const chat = getActiveChat();
-  console.log('Active chat:', chat);
   if (!chat) {
-    console.error('No active chat found!');
-    showToast('No active chat - creating new one');
     createNewChat();
     return;
   }
   
   if (!state.apiKey) {
-    console.log('No API key');
     showToast('Please add your API key in settings');
     openSettings();
     return;
   }
   
-  console.log('Sending to API with key:', state.apiKey.substring(0, 10) + '...');
-  
-  // Add user message
   chat.messages.push({ role: 'user', content });
   input.value = '';
   input.style.height = 'auto';
   document.getElementById('sendButton').disabled = true;
   renderMessages();
   
-  // Show loading message
   showToast('Sending...');
   
-  // Auto-name chat after first exchange
-  if (chat.messages.length === 1) {
-    autoNameChat(chat);
-  }
+  // Get relevant memories
+  const relevantMemories = getRelevantMemories(content);
+  showMemoryBadge(relevantMemories);
   
   // Build API messages
   const messages = [
-    { role: 'system', content: state.systemPrompt },
-    ...chat.messages.slice(-8)
+    { role: 'system', content: state.systemPrompt }
   ];
   
-  console.log('API Request:', {
-    model: chat.model,
-    messageCount: messages.length,
-    systemPromptLength: state.systemPrompt.length
-  });
+  // Add memories
+  if (relevantMemories.length > 0) {
+    const memoryBlock = relevantMemories.map(m => 
+      `## ${m.name}\n${m.content}`
+    ).join('\n\n---\n\n');
+    messages.push({ role: 'system', content: `[MEMORIES]\n\n${memoryBlock}` });
+  }
+  
+  // Add conversation history
+  messages.push(...chat.messages.slice(-8));
   
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -865,40 +1074,31 @@ async function sendMessage() {
       })
     });
     
-    console.log('Response status:', response.status);
-    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error:', errorText);
-      throw new Error(`API request failed: ${response.status} - ${errorText.substring(0, 100)}`);
+      throw new Error(`API error: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('API Response:', data);
-    
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('Invalid API response format');
-    }
-    
     const assistantMessage = data.choices[0].message.content;
     
     chat.messages.push({ role: 'assistant', content: assistantMessage });
     renderMessages();
     saveState();
-    showToast('Message received');
+    
+    // Auto-name after second message
+    if (chat.messages.length === 2 && chat.title === 'New conversation') {
+      autoNameChat(chat);
+    }
     
   } catch (error) {
     showToast('Error: ' + error.message);
-    console.error('Full error:', error);
-    // Remove the user message if API failed
     chat.messages.pop();
     renderMessages();
   }
 }
 
 async function autoNameChat(chat) {
-  if (chat.messages.length < 2) return;
-  
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -910,8 +1110,9 @@ async function autoNameChat(chat) {
       body: JSON.stringify({
         model: chat.model,
         messages: [
-          { role: 'system', content: 'Generate a short 3-5 word title for this conversation. No quotes, no punctuation.' },
-          ...chat.messages.slice(0, 4)
+          { role: 'system', content: 'Generate a 3-5 word title for this conversation. No quotes, no punctuation.' },
+          { role: 'user', content: chat.messages[0].content },
+          { role: 'assistant', content: chat.messages[1].content }
         ],
         temperature: 0.7,
         max_tokens: 20
@@ -920,7 +1121,7 @@ async function autoNameChat(chat) {
     
     if (response.ok) {
       const data = await response.json();
-      const title = data.choices[0].message.content.trim();
+      const title = data.choices[0].message.content.trim().replace(/['"]/g, '');
       chat.title = title;
       renderChatList();
       saveState();
@@ -930,10 +1131,120 @@ async function autoNameChat(chat) {
   }
 }
 
+// MEMORIES UI
+function openMemories() {
+  renderMemoryList();
+  document.getElementById('memoriesModal').classList.add('visible');
+  toggleSidebar();
+}
+
+function closeMemories() {
+  document.getElementById('memoriesModal').classList.remove('visible');
+}
+
+function renderMemoryList() {
+  const list = document.getElementById('memoryList');
+  if (state.memories.length === 0) {
+    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No memories yet</p>';
+    return;
+  }
+  
+  list.innerHTML = state.memories.map(mem => `
+    <div class="memory-item">
+      <div class="memory-item-header">
+        <div class="memory-item-name">${escapeHtml(mem.name)}</div>
+      </div>
+      <div class="memory-item-meta">
+        <span class="priority-${mem.priority}">${mem.priority}</span>
+        ${mem.pinned ? ' • 📌 Pinned' : ''}
+      </div>
+      ${mem.keywords && mem.keywords.length > 0 ? `
+        <div class="memory-item-keywords">
+          ${mem.keywords.map(kw => `<span class="keyword-badge">${escapeHtml(kw)}</span>`).join('')}
+        </div>
+      ` : ''}
+      <div class="memory-item-actions">
+        <button class="btn-small" onclick="openMemoryEditor('${mem.id}')">Edit</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openMemoryEditor(id) {
+  currentMemoryId = id;
+  const memory = id ? state.memories.find(m => m.id === id) : null;
+  
+  document.getElementById('memoryEditorTitle').textContent = id ? 'Edit Memory' : 'Create Memory';
+  document.getElementById('memoryNameInput').value = memory?.name || '';
+  document.getElementById('memoryContentInput').value = memory?.content || '';
+  document.getElementById('memoryKeywordsInput').value = memory?.keywords?.join(', ') || '';
+  document.getElementById('memoryPriorityInput').value = memory?.priority || 'medium';
+  document.getElementById('memoryPinnedInput').checked = memory?.pinned || false;
+  document.getElementById('deleteMemoryBtn').style.display = id ? 'block' : 'none';
+  
+  document.getElementById('memoriesModal').classList.remove('visible');
+  document.getElementById('memoryEditorModal').classList.add('visible');
+}
+
+function closeMemoryEditor() {
+  document.getElementById('memoryEditorModal').classList.remove('visible');
+  document.getElementById('memoriesModal').classList.add('visible');
+}
+
+function saveMemory() {
+  const name = document.getElementById('memoryNameInput').value.trim();
+  const content = document.getElementById('memoryContentInput').value.trim();
+  const keywordsRaw = document.getElementById('memoryKeywordsInput').value;
+  const priority = document.getElementById('memoryPriorityInput').value;
+  const pinned = document.getElementById('memoryPinnedInput').checked;
+  
+  if (!name || !content) {
+    showToast('Name and content are required');
+    return;
+  }
+  
+  const keywords = keywordsRaw.split(',').map(k => k.trim()).filter(k => k);
+  
+  if (currentMemoryId) {
+    const memory = state.memories.find(m => m.id === currentMemoryId);
+    if (memory) {
+      memory.name = name;
+      memory.content = content;
+      memory.keywords = keywords;
+      memory.priority = priority;
+      memory.pinned = pinned;
+    }
+  } else {
+    state.memories.push({
+      id: Date.now().toString(),
+      name,
+      content,
+      keywords,
+      priority,
+      pinned
+    });
+  }
+  
+  saveState();
+  closeMemoryEditor();
+  renderMemoryList();
+  showToast('Memory saved');
+}
+
+function deleteMemory() {
+  if (!confirm('Delete this memory?')) return;
+  
+  state.memories = state.memories.filter(m => m.id !== currentMemoryId);
+  saveState();
+  closeMemoryEditor();
+  renderMemoryList();
+  showToast('Memory deleted');
+}
+
 // VOICE
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Voice input not supported in this browser');
+    showToast('Voice input not supported');
     return;
   }
   
@@ -973,6 +1284,7 @@ function openSettings() {
   document.getElementById('apiKeyInput').value = state.apiKey;
   document.getElementById('systemPromptInput').value = state.systemPrompt;
   document.getElementById('modelSelect').value = state.model;
+  document.getElementById('maxMemoriesInput').value = state.maxMemories;
   document.getElementById('settingsModal').classList.add('visible');
 }
 
@@ -984,12 +1296,10 @@ function saveSettings() {
   state.apiKey = document.getElementById('apiKeyInput').value.trim();
   state.systemPrompt = document.getElementById('systemPromptInput').value.trim();
   state.model = document.getElementById('modelSelect').value;
+  state.maxMemories = parseInt(document.getElementById('maxMemoriesInput').value) || 3;
   
-  // Update active chat model
   const chat = getActiveChat();
-  if (chat) {
-    chat.model = state.model;
-  }
+  if (chat) chat.model = state.model;
   
   saveState();
   closeSettings();
@@ -998,11 +1308,11 @@ function saveSettings() {
 
 // PERSISTENCE
 function saveState() {
-  localStorage.setItem('bloodink_state', JSON.stringify(state));
+  localStorage.setItem('bloodink_v2', JSON.stringify(state));
 }
 
 function loadState() {
-  const saved = localStorage.getItem('bloodink_state');
+  const saved = localStorage.getItem('bloodink_v2');
   if (saved) {
     state = { ...state, ...JSON.parse(saved) };
   }
@@ -1027,4 +1337,3 @@ init();
 </script>
 </body>
 </html>
-```
