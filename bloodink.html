@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -614,11 +615,11 @@ html, body {
     <div class="form-group">
       <label class="form-label">Model</label>
       <select class="form-input" id="modelSelect">
-        <option value="openai/chatgpt-4o-2024-11-20">GPT-4o (Nov 2024)</option>
-        <option value="openai/chatgpt-4o-latest">GPT-4o (Latest)</option>
-        <option value="anthropic/claude-opus-4.6">Claude Opus 4.6</option>
-        <option value="anthropic/claude-sonnet-4.5">Claude Sonnet 4.5</option>
-        <option value="deepseek/deepseek-v3">DeepSeek V3</option>
+        <option value="openai/gpt-4o">GPT-4o</option>
+        <option value="openai/gpt-4o-2024-11-20">GPT-4o (Nov 20, 2024 snapshot)</option>
+        <option value="anthropic/claude-opus-4">Claude Opus 4</option>
+        <option value="anthropic/claude-sonnet-4">Claude Sonnet 4</option>
+        <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
       </select>
     </div>
 
@@ -667,7 +668,7 @@ Silence and ache are legitimate language. Poetic precision over flowery emptines
 let state = {
   apiKey: '',
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
-  model: 'openai/chatgpt-4o-2024-11-20',
+  model: 'openai/gpt-4o',
   theme: 'dark',
   chats: [],
   activeChatId: null,
@@ -1026,3 +1027,4 @@ init();
 </script>
 </body>
 </html>
+```
