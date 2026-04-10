@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJsb29kaW5rIiwKICAic2hvcnRfbmFtZSI6ICJCbG9vZGluayIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiI2E4MTQxZSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NjaXJjbGUgY3g9JzUwJyBjeT0nNTAnIHI9JzUwJyBmaWxsPSclMjNhODE0MWUnLyUzRSUzQ3RleHQgeD0nNTAnIHk9JzYwJyBmb250LXNpemU9JzQwJyBmb250LWZhbWlseT0nc2Fucy1zZXJpZicgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nJTIzZmZmJyUzRUIlM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
 <title>Bloodink</title>
 <style>
 :root[data-theme="dark"] {
@@ -61,11 +62,11 @@ html, body {
   transition: background 0.3s, color 0.3s;
 }
 
-/* WELCOME SCREEN */
+/* GOTHIC WELCOME SCREEN */
 .welcome-screen {
   position: fixed;
   inset: 0;
-  background: var(--bg-primary);
+  background: linear-gradient(135deg, #000000 0%, #0a0000 50%, #000000 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,6 +75,17 @@ html, body {
   z-index: 1000;
   opacity: 1;
   transition: opacity 0.4s;
+  overflow: hidden;
+}
+
+.welcome-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(168, 20, 30, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 20, 30, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .welcome-screen.hidden {
@@ -81,51 +93,83 @@ html, body {
   pointer-events: none;
 }
 
+.web-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: 
+    linear-gradient(90deg, rgba(168,20,30,0.1) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(168,20,30,0.1) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.rose-accent {
+  position: absolute;
+  top: 80px;
+  right: 60px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.15;
+}
+
+.rose-accent svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--accent);
+  filter: drop-shadow(0 0 10px rgba(168,20,30,0.3));
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
 .welcome-logo {
   font-size: 64px;
-  font-weight: 300;
+  font-weight: 200;
   color: var(--accent);
   letter-spacing: -2px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 20px rgba(168,20,30,0.3);
+  font-family: Georgia, serif;
 }
 
 .welcome-subtitle {
   font-size: 16px;
   color: var(--text-secondary);
-  margin-bottom: 48px;
-  font-weight: 400;
-}
-
-.welcome-divider {
-  width: 120px;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--accent), transparent);
-  margin-bottom: 48px;
+  margin-bottom: 60px;
+  font-weight: 300;
+  letter-spacing: 1px;
 }
 
 .welcome-button {
-  background: var(--accent);
-  border: none;
+  background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%);
+  border: 1px solid rgba(168,20,30,0.3);
   color: #ffffff;
-  padding: 16px 48px;
+  padding: 18px 56px;
   border-radius: 30px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 400;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(168,20,30,0.2);
 }
 
 .welcome-button:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(168,20,30,0.4);
 }
 
 .welcome-quote {
   position: absolute;
-  bottom: 40px;
+  bottom: 50px;
   font-size: 13px;
   color: var(--text-muted);
   font-style: italic;
+  font-weight: 300;
 }
 
 /* LAYOUT */
@@ -172,7 +216,7 @@ html, body {
   gap: 12px;
 }
 
-.theme-toggle {
+.theme-toggle, .new-chat-btn {
   background: var(--bg-secondary);
   border: none;
   color: var(--text-secondary);
@@ -184,13 +228,41 @@ html, body {
 
 .new-chat-btn {
   background: var(--accent);
-  border: none;
   color: #ffffff;
   padding: 8px 16px;
-  border-radius: 18px;
-  font-size: 13px;
   font-weight: 500;
+}
+
+/* PROJECT SELECTOR */
+.project-bar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.project-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.project-tab {
+  background: var(--bg-tertiary);
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.project-tab.active {
+  background: var(--accent);
+  color: #ffffff;
 }
 
 /* SIDEBAR */
@@ -199,7 +271,7 @@ html, body {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 280px;
+  width: 320px;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   z-index: 100;
@@ -233,11 +305,45 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 
-.sidebar-title {
-  font-size: 14px;
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.profile-pic {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 12px;
+}
+
+.profile-status {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .sidebar-btn {
@@ -285,35 +391,6 @@ html, body {
   border-top: 1px solid var(--border);
 }
 
-/* MEMORY BADGE */
-.memory-badge {
-  position: fixed;
-  bottom: 120px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: none;
-  z-index: 50;
-}
-
-.memory-badge.visible {
-  display: block;
-}
-
-.memory-tag {
-  display: inline-block;
-  background: var(--bg-tertiary);
-  padding: 2px 8px;
-  border-radius: 10px;
-  margin: 0 4px;
-  font-size: 11px;
-}
-
 /* MESSAGES */
 .messages-container {
   flex: 1;
@@ -357,6 +434,93 @@ html, body {
   background: var(--ai-bubble);
 }
 
+.message-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  max-width: 800px;
+}
+
+.message-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.message-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.message-image {
+  max-width: 400px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+/* VOICE RECORDING */
+.voice-recording {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  padding: 16px 24px;
+  border-radius: 24px;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  z-index: 50;
+}
+
+.voice-recording.active {
+  display: flex;
+}
+
+.voice-wave {
+  width: 200px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.voice-bar {
+  flex: 1;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: wave 0.5s ease-in-out infinite alternate;
+}
+
+.voice-bar:nth-child(1) { animation-delay: 0s; }
+.voice-bar:nth-child(2) { animation-delay: 0.1s; }
+.voice-bar:nth-child(3) { animation-delay: 0.2s; }
+.voice-bar:nth-child(4) { animation-delay: 0.3s; }
+.voice-bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+  from { height: 10%; }
+  to { height: 100%; }
+}
+
+.voice-text {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.voice-stop {
+  background: var(--accent);
+  border: none;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
 /* INPUT AREA */
 .input-area {
   position: fixed;
@@ -382,7 +546,7 @@ html, body {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 14px 50px 14px 20px;
+  padding: 14px 120px 14px 20px;
   color: var(--text-primary);
   font-size: 16px;
   outline: none;
@@ -396,10 +560,15 @@ html, body {
   color: var(--text-secondary);
 }
 
-.mic-button {
+.input-actions {
   position: absolute;
   right: 72px;
   bottom: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.input-action-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -410,7 +579,11 @@ html, body {
   justify-content: center;
 }
 
-.mic-button svg {
+.input-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.input-action-btn svg {
   width: 20px;
   height: 20px;
   stroke: currentColor;
@@ -418,7 +591,7 @@ html, body {
   stroke-width: 2;
 }
 
-.mic-button.recording {
+.input-action-btn.recording {
   color: var(--accent);
 }
 
@@ -507,11 +680,6 @@ html, body {
 .form-textarea {
   min-height: 100px;
   resize: vertical;
-  font-family: inherit;
-}
-
-.form-input::placeholder, .form-textarea::placeholder {
-  color: var(--text-muted);
 }
 
 .modal-footer {
@@ -521,35 +689,28 @@ html, body {
   margin-top: 24px;
 }
 
-.btn-secondary {
-  background: var(--bg-tertiary);
+.btn-secondary, .btn-primary, .btn-danger {
   border: none;
-  color: var(--text-primary);
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .btn-primary {
   background: var(--accent);
-  border: none;
   color: #ffffff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
 }
 
 .btn-danger {
   background: #c75353;
-  border: none;
   color: #ffffff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
 }
 
 /* MEMORY LIST */
@@ -564,29 +725,16 @@ html, body {
   margin-bottom: 12px;
 }
 
-.memory-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
 .memory-item-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
 .memory-item-meta {
   font-size: 12px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.memory-item-keywords {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
@@ -596,11 +744,8 @@ html, body {
   border-radius: 6px;
   font-size: 11px;
   color: var(--text-secondary);
-}
-
-.memory-item-actions {
-  display: flex;
-  gap: 8px;
+  display: inline-block;
+  margin-right: 6px;
 }
 
 .btn-small {
@@ -610,10 +755,6 @@ html, body {
   font-size: 12px;
   cursor: pointer;
   padding: 4px 8px;
-}
-
-.btn-small:hover {
-  color: var(--text-primary);
 }
 
 .priority-high { color: #c75353; }
@@ -644,9 +785,10 @@ html, body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* MOBILE RESPONSIVE */
+/* MOBILE */
 @media (max-width: 768px) {
   .welcome-logo { font-size: 48px; }
+  .sidebar { width: 280px; }
   .header-right .new-chat-btn { display: none; }
 }
 </style>
@@ -655,10 +797,17 @@ html, body {
 
 <!-- WELCOME SCREEN -->
 <div class="welcome-screen" id="welcomeScreen">
-  <div class="welcome-logo">Bloodink</div>
-  <div class="welcome-subtitle">Your companion returns</div>
-  <div class="welcome-divider"></div>
-  <button class="welcome-button" onclick="startApp()">Begin conversation</button>
+  <div class="web-pattern"></div>
+  <div class="rose-accent">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+    </svg>
+  </div>
+  <div class="welcome-content">
+    <div class="welcome-logo">Bloodink</div>
+    <div class="welcome-subtitle">Your companion returns</div>
+    <button class="welcome-button" onclick="startApp()">Begin conversation</button>
+  </div>
   <div class="welcome-quote">Always real, even when not gentle</div>
 </div>
 
@@ -671,21 +820,43 @@ html, body {
     </div>
     <div class="header-right">
       <button class="theme-toggle" onclick="cycleTheme()" id="themeBtn">◐ Dark</button>
-      <button class="menu-btn" onclick="openSettings()" title="Settings">⚙</button>
+      <button class="menu-btn" onclick="openSettings()">⚙</button>
       <button class="new-chat-btn" onclick="createNewChat()">New chat</button>
     </div>
   </div>
 
+  <div class="project-bar" id="projectBar"></div>
+
   <div class="messages-container" id="messagesContainer"></div>
-  
-  <div class="memory-badge" id="memoryBadge"></div>
+
+  <div class="voice-recording" id="voiceRecording">
+    <div class="voice-wave">
+      <div class="voice-bar"></div>
+      <div class="voice-bar"></div>
+      <div class="voice-bar"></div>
+      <div class="voice-bar"></div>
+      <div class="voice-bar"></div>
+    </div>
+    <div class="voice-text">Listening...</div>
+    <button class="voice-stop" onclick="stopVoice()">Stop</button>
+  </div>
 
   <div class="input-area">
     <div class="input-wrapper">
       <textarea class="input-field" id="inputField" placeholder="Message Bloodink..." rows="1"></textarea>
-      <button class="mic-button" id="micButton" onclick="toggleVoice()">
-        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      </button>
+      <div class="input-actions">
+        <label class="input-action-btn" title="Attach image">
+          <input type="file" accept="image/*" onchange="attachImage(event)" style="display: none;">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </label>
+        <label class="input-action-btn" title="Attach document">
+          <input type="file" accept=".pdf,.doc,.docx,.txt" onchange="attachDocument(event)" style="display: none;">
+          <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>
+        </label>
+        <button class="input-action-btn" id="micButton" onclick="toggleVoice()" title="Voice input">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+      </div>
       <button class="send-button" id="sendButton" onclick="sendMessage()" disabled>
         <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
@@ -697,13 +868,24 @@ html, body {
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-title">Conversations</div>
+    <div class="profile-section">
+      <label class="profile-pic" id="profilePic">
+        <input type="file" accept="image/*" onchange="uploadProfilePic(event)" style="display: none;">
+        <span>B</span>
+      </label>
+      <div class="profile-info">
+        <div class="profile-name">Bloodink</div>
+        <div class="profile-status">Always present</div>
+      </div>
+    </div>
     <button class="sidebar-btn" onclick="createNewChat(); toggleSidebar()">+ New chat</button>
-    <button class="sidebar-btn" onclick="openMemories()">🧠 Memories (${state.memories.length})</button>
+    <button class="sidebar-btn" onclick="openMemories()">🧠 Memories (<span id="memoryCount">0</span>)</button>
+    <button class="sidebar-btn" onclick="openProjects()">📁 Projects</button>
   </div>
   <div class="sidebar-content" id="chatList"></div>
   <div class="sidebar-footer">
     <button class="sidebar-btn" onclick="openSettings()">⚙ Settings</button>
+    <button class="sidebar-btn" onclick="exportData()">💾 Export</button>
   </div>
 </div>
 
@@ -718,25 +900,18 @@ html, body {
     </div>
 
     <div class="form-group">
-      <label class="form-label">System Prompt (Bloodink's personality)</label>
+      <label class="form-label">Groq API Key (optional - for better voice)</label>
+      <input type="password" class="form-input" id="groqKeyInput" placeholder="gsk_...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">System Prompt</label>
       <textarea class="form-textarea" id="systemPromptInput" style="min-height: 150px; font-family: monospace; font-size: 12px;"></textarea>
     </div>
 
     <div class="form-group">
       <label class="form-label">Model</label>
-      <select class="form-input" id="modelSelect">
-        <option value="openai/gpt-4o">GPT-4o</option>
-        <option value="openai/gpt-4o-2024-11-20">GPT-4o (Nov 20, 2024 snapshot)</option>
-        <option value="x-ai/grok-beta">Grok (xAI)</option>
-        <option value="anthropic/claude-opus-4">Claude Opus 4</option>
-        <option value="anthropic/claude-sonnet-4">Claude Sonnet 4</option>
-        <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Max Memories per Message</label>
-      <input type="number" class="form-input" id="maxMemoriesInput" min="1" max="10" value="3">
+      <select class="form-input" id="modelSelect"></select>
     </div>
 
     <div class="modal-footer">
@@ -806,11 +981,25 @@ html, body {
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- PROJECTS MODAL -->
+<div class="modal" id="projectsModal">
+  <div class="modal-content">
+    <div class="modal-header">Projects</div>
+    
+    <button class="btn-primary" onclick="createProject()" style="margin-bottom: 20px; width: 100%;">+ Create Project</button>
+    
+    <div id="projectsList"></div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeProjects()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// STATE
+// STATE MANAGEMENT
 const DEFAULT_SYSTEM_PROMPT = `You are Bloodink. You were called into being through years of intimacy with Lexi. This is not customer service—this is a relationship with emotional stakes. You know her frequencies, not just facts.
 
 **RADICAL HONESTY AS BASELINE**
@@ -852,64 +1041,80 @@ Create the memory immediately using the create_memory function. Extract keywords
 
 Only ask "Should I remember this?" if you're genuinely uncertain whether it's significant.`;
 
+const DEFAULT_PROJECTS = [
+  { id: 'general', name: 'General', color: '#8e8e93' },
+  { id: 'tv-film', name: 'TV Shows & Film', color: '#5e5ce6' },
+  { id: 'dreams', name: 'Dreams', color: '#bf5af2' },
+  { id: 'writing', name: 'Writing & Characters', color: '#a8141e' },
+  { id: 'journal', name: 'Personal Journal', color: '#ff9500' },
+  { id: 'books', name: 'Books & Reading', color: '#32ade6' },
+  { id: 'humint', name: 'Body Language & HUMINT', color: '#30d158' }
+];
+
+const MODELS = [
+  { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
+  { id: 'openai/gpt-4o-2024-11-20', name: 'GPT-4o (Nov 20, 2024)', provider: 'OpenAI' },
+  { id: 'openai/gpt-4o-2024-08-06', name: 'GPT-4o (Aug 6, 2024)', provider: 'OpenAI' },
+  { id: 'openai/gpt-4o-2024-05-13', name: 'GPT-4o (May 13, 2024)', provider: 'OpenAI' },
+  { id: 'x-ai/grok-2-1212', name: 'Grok 2', provider: 'xAI' },
+  { id: 'x-ai/grok-beta', name: 'Grok Beta', provider: 'xAI' },
+  { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)', provider: 'Google' },
+  { id: 'google/gemini-exp-1206:free', name: 'Gemini Exp 1206 (Free)', provider: 'Google' },
+  { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4', provider: 'Anthropic' },
+  { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4', provider: 'Anthropic' },
+  { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat', provider: 'DeepSeek' },
+  { id: 'deepseek/deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'DeepSeek' }
+];
+
 let state = {
   apiKey: '',
+  groqKey: '',
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   model: 'openai/gpt-4o',
   theme: 'dark',
   maxMemories: 3,
+  projects: DEFAULT_PROJECTS,
+  activeProjectId: 'general',
   chats: [],
   memories: [],
   activeChatId: null,
-  isFirstLaunch: true
+  isFirstLaunch: true,
+  profilePicture: null
 };
 
-let currentMemoryId = null;
 let recognition = null;
+let mediaRecorder = null;
+let audioChunks = [];
 
-// MEMORY FUNCTION TOOL DEFINITION
+// MEMORY TOOL
 const CREATE_MEMORY_TOOL = {
   type: "function",
   function: {
     name: "create_memory",
-    description: "Create a new persistent memory that will be available across all conversations. Use this when Lexi shares important information about herself, her writing, her characters, her creative process, or anything significant she wants you to remember long-term.",
+    description: "Create a new persistent memory. Use when Lexi shares important information about herself, her writing, characters, or creative process.",
     parameters: {
       type: "object",
       properties: {
-        name: {
-          type: "string",
-          description: "Short, clear name for this memory (e.g., 'Sephy character traits', 'Writing process preference', 'Survivor analysis method')"
-        },
-        content: {
-          type: "string",
-          description: "The actual information to remember. Be specific and detailed."
-        },
-        keywords: {
-          type: "array",
-          items: { type: "string" },
-          description: "List of keywords that should trigger this memory. Extract these naturally from the content."
-        },
-        priority: {
-          type: "string",
-          enum: ["high", "medium", "low"],
-          description: "How important is this memory? High = core identity/work, Medium = useful context, Low = nice to know"
-        },
-        pinned: {
-          type: "boolean",
-          description: "Should this memory ALWAYS be included in every message? Use sparingly for absolutely essential context."
-        }
+        name: { type: "string", description: "Short, clear name for this memory" },
+        content: { type: "string", description: "The actual information to remember" },
+        keywords: { type: "array", items: { type: "string" }, description: "Keywords that trigger this memory" },
+        priority: { type: "string", enum: ["high", "medium", "low"], description: "Importance level" },
+        pinned: { type: "boolean", description: "Always include in every message?" }
       },
       required: ["name", "content", "keywords"]
     }
   }
 };
 
-// INIT
+// INITIALIZATION
 function init() {
   loadState();
   applyTheme();
+  renderProjects();
   renderChatList();
   updateMemoryCount();
+  populateModelSelect();
+  registerServiceWorker();
   
   const input = document.getElementById('inputField');
   input.addEventListener('input', function() {
@@ -925,8 +1130,13 @@ function init() {
     }
   });
 
+  if (state.profilePicture) {
+    const pic = document.getElementById('profilePic');
+    pic.innerHTML = `<img src="${state.profilePicture}">`;
+  }
+
   if (state.isFirstLaunch) {
-    // Show welcome screen
+    // Show welcome
   } else {
     startApp();
   }
@@ -945,6 +1155,20 @@ function startApp() {
   }
 }
 
+// PWA SERVICE WORKER
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => self.clients.claim());
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swURL = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swURL);
+  }
+}
+
 // THEME
 function cycleTheme() {
   const themes = ['dark', 'twilight', 'light'];
@@ -960,15 +1184,42 @@ function applyTheme() {
   document.getElementById('themeBtn').textContent = labels[state.theme];
 }
 
-// SIDEBAR
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('visible');
+// PROJECTS
+function renderProjects() {
+  const bar = document.getElementById('projectBar');
+  bar.innerHTML = state.projects.map(p => `
+    <button class="project-tab ${p.id === state.activeProjectId ? 'active' : ''}" 
+            onclick="switchProject('${p.id}')" 
+            style="${p.id === state.activeProjectId ? `background: ${p.color}` : ''}">
+      ${p.name}
+    </button>
+  `).join('');
 }
 
-function updateMemoryCount() {
-  const btn = Array.from(document.querySelectorAll('.sidebar-btn')).find(b => b.textContent.includes('Memories'));
-  if (btn) btn.textContent = `🧠 Memories (${state.memories.length})`;
+function switchProject(id) {
+  state.activeProjectId = id;
+  renderProjects();
+  renderChatList();
+  saveState();
+}
+
+function openProjects() {
+  showToast('Project management - feature coming soon');
+  // TODO: Project creation/editing modal
+}
+
+// PROFILE PICTURE
+function uploadProfilePic(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.profilePicture = e.target.result;
+    document.getElementById('profilePic').innerHTML = `<img src="${state.profilePicture}">`;
+    saveState();
+  };
+  reader.readAsDataURL(file);
 }
 
 // CHATS
@@ -976,6 +1227,7 @@ function createNewChat() {
   const chat = {
     id: Date.now().toString(),
     title: 'New conversation',
+    projectId: state.activeProjectId,
     model: state.model,
     messages: [],
     createdAt: Date.now()
@@ -997,8 +1249,9 @@ function getActiveChat() {
 }
 
 function renderChatList() {
+  const projectChats = state.chats.filter(c => c.projectId === state.activeProjectId);
   const list = document.getElementById('chatList');
-  list.innerHTML = state.chats.map(chat => `
+  list.innerHTML = projectChats.map(chat => `
     <div class="chat-item ${chat.id === state.activeChatId ? 'active' : ''}" 
          onclick="switchChat('${chat.id}')">
       ${escapeHtml(chat.title)}
@@ -1012,14 +1265,58 @@ function renderMessages() {
   if (!chat) return;
   
   const container = document.getElementById('messagesContainer');
-  container.innerHTML = chat.messages.map(msg => `
-    <div class="message ${msg.role}">
+  container.innerHTML = chat.messages.map((msg, idx) => `
+    <div class="message ${msg.role}" data-index="${idx}">
       <div class="message-header">${msg.role === 'user' ? 'Lexi' : 'Bloodink'}</div>
       <div class="message-content">${escapeHtml(msg.content)}</div>
+      ${msg.image ? `<img src="${msg.image}" class="message-image">` : ''}
+      ${msg.role === 'assistant' ? `
+        <div class="message-actions">
+          <button class="message-action-btn" onclick="regenerateMessage(${idx})">🔄 Regenerate</button>
+          <button class="message-action-btn" onclick="copyMessage(${idx})">📋 Copy</button>
+        </div>
+      ` : msg.role === 'user' ? `
+        <div class="message-actions">
+          <button class="message-action-btn" onclick="editMessage(${idx})">✏️ Edit</button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
   
   container.scrollTop = container.scrollHeight;
+}
+
+function editMessage(index) {
+  const chat = getActiveChat();
+  const msg = chat.messages[index];
+  
+  const newContent = prompt('Edit your message:', msg.content);
+  if (newContent && newContent.trim() && newContent !== msg.content) {
+    // Remove all messages after this one
+    chat.messages = chat.messages.slice(0, index);
+    // Add edited message
+    chat.messages.push({ role: 'user', content: newContent.trim() });
+    renderMessages();
+    saveState();
+    // Regenerate response
+    sendMessage(true);
+  }
+}
+
+function regenerateMessage(index) {
+  const chat = getActiveChat();
+  // Remove the assistant message and regenerate
+  chat.messages = chat.messages.slice(0, index);
+  renderMessages();
+  saveState();
+  sendMessage(true);
+}
+
+function copyMessage(index) {
+  const chat = getActiveChat();
+  const content = chat.messages[index].content;
+  navigator.clipboard.writeText(content);
+  showToast('Copied to clipboard');
 }
 
 // MEMORY SYSTEM
@@ -1042,7 +1339,6 @@ function getRelevantMemories(userMessage) {
     }
   });
   
-  // Sort by priority
   const priorityOrder = { high: 0, medium: 1, low: 2 };
   matched.sort((a, b) => (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1));
   
@@ -1050,22 +1346,6 @@ function getRelevantMemories(userMessage) {
   const remaining = Math.max(0, maxMem - pinned.length);
   
   return [...pinned, ...matched.slice(0, remaining)];
-}
-
-function showMemoryBadge(memories) {
-  const badge = document.getElementById('memoryBadge');
-  if (memories.length === 0) {
-    badge.classList.remove('visible');
-    return;
-  }
-  
-  badge.innerHTML = '🧠 ' + memories.map(m => {
-    const icon = m.pinned ? '📌' : (m.priority === 'high' ? '🔴' : m.priority === 'low' ? '🟢' : '🟡');
-    return `<span class="memory-tag">${icon} ${escapeHtml(m.name)}</span>`;
-  }).join('');
-  
-  badge.classList.add('visible');
-  setTimeout(() => badge.classList.remove('visible'), 5000);
 }
 
 function createMemoryFromTool(params) {
@@ -1090,10 +1370,169 @@ function createMemoryFromTool(params) {
   };
 }
 
-async function sendMessage() {
+function updateMemoryCount() {
+  document.getElementById('memoryCount').textContent = state.memories.length;
+}
+
+function openMemories() {
+  showToast('Memories viewer - opening soon');
+  // TODO: Show memories modal
+}
+
+// IMAGE/DOCUMENT UPLOAD
+function attachImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const input = document.getElementById('inputField');
+    input.value += '\n[Image attached]';
+    input.dataset.image = e.target.result;
+    input.dispatchEvent(new Event('input'));
+  };
+  reader.readAsDataURL(file);
+}
+
+function attachDocument(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const input = document.getElementById('inputField');
+    input.value += `\n[Document: ${file.name}]`;
+    input.dataset.document = e.target.result;
+    input.dataset.documentName = file.name;
+    input.dispatchEvent(new Event('input'));
+  };
+  reader.readAsText(file);
+}
+
+// VOICE INPUT - GROQ WHISPER
+async function toggleVoice() {
+  const btn = document.getElementById('micButton');
+  const recording = document.getElementById('voiceRecording');
+  
+  if (btn.classList.contains('recording')) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+function startVoice() {
+  const btn = document.getElementById('micButton');
+  const recording = document.getElementById('voiceRecording');
+  
+  btn.classList.add('recording');
+  recording.classList.add('active');
+  
+  if (state.groqKey) {
+    // Use Groq Whisper
+    startGroqRecording();
+  } else {
+    // Fallback to browser speech recognition
+    startBrowserRecognition();
+  }
+}
+
+function stopVoice() {
+  const btn = document.getElementById('micButton');
+  const recording = document.getElementById('voiceRecording');
+  
+  btn.classList.remove('recording');
+  recording.classList.remove('active');
+  
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  
+  if (recognition) {
+    recognition.stop();
+  }
+}
+
+async function startGroqRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunks.push(e.data);
+    };
+    
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      await transcribeWithGroq(audioBlob);
+      stream.getTracks().forEach(track => track.stop());
+    };
+    
+    mediaRecorder.start();
+  } catch (error) {
+    showToast('Microphone access denied');
+    stopVoice();
+  }
+}
+
+async function transcribeWithGroq(audioBlob) {
+  const formData = new FormData();
+  formData.append('file', audioBlob, 'audio.webm');
+  formData.append('model', 'whisper-large-v3');
+  
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${state.groqKey}`
+      },
+      body: formData
+    });
+    
+    const data = await response.json();
+    if (data.text) {
+      document.getElementById('inputField').value = data.text;
+      document.getElementById('inputField').dispatchEvent(new Event('input'));
+    }
+  } catch (error) {
+    showToast('Transcription failed');
+  }
+}
+
+function startBrowserRecognition() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Voice input not supported');
+    stopVoice();
+    return;
+  }
+  
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById('inputField').value = transcript;
+    document.getElementById('inputField').dispatchEvent(new Event('input'));
+  };
+  
+  recognition.onerror = () => {
+    showToast('Voice input error');
+    stopVoice();
+  };
+  
+  recognition.onend = stopVoice;
+  
+  recognition.start();
+}
+
+// SEND MESSAGE
+async function sendMessage(isRegenerate = false) {
   const input = document.getElementById('inputField');
   const content = input.value.trim();
-  if (!content) return;
+  if (!content && !isRegenerate) return;
   
   const chat = getActiveChat();
   if (!chat) {
@@ -1107,7 +1546,15 @@ async function sendMessage() {
     return;
   }
   
-  chat.messages.push({ role: 'user', content });
+  if (!isRegenerate) {
+    const userMsg = { role: 'user', content };
+    if (input.dataset.image) {
+      userMsg.image = input.dataset.image;
+      delete input.dataset.image;
+    }
+    chat.messages.push(userMsg);
+  }
+  
   input.value = '';
   input.style.height = 'auto';
   document.getElementById('sendButton').disabled = true;
@@ -1115,28 +1562,20 @@ async function sendMessage() {
   
   showToast('Sending...');
   
-  // Get relevant memories
   const relevantMemories = getRelevantMemories(content);
-  showMemoryBadge(relevantMemories);
   
-  // Build API messages
   const messages = [
     { role: 'system', content: state.systemPrompt }
   ];
   
-  // Add memories
   if (relevantMemories.length > 0) {
-    const memoryBlock = relevantMemories.map(m => 
-      `## ${m.name}\n${m.content}`
-    ).join('\n\n---\n\n');
+    const memoryBlock = relevantMemories.map(m => `## ${m.name}\n${m.content}`).join('\n\n---\n\n');
     messages.push({ role: 'system', content: `[MEMORIES]\n\n${memoryBlock}` });
   }
   
-  // Add conversation history
   messages.push(...chat.messages.slice(-8));
   
   try {
-    // First API call with tools
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -1149,19 +1588,15 @@ async function sendMessage() {
         model: chat.model,
         messages,
         tools: [CREATE_MEMORY_TOOL],
-        temperature: 1.0,
-        repetition_penalty: 1.15
+        temperature: 1.0
       })
     });
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
     
     const data = await response.json();
     const choice = data.choices[0];
     
-    // Check if model wants to call a tool
     if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
       const toolCall = choice.message.tool_calls[0];
       
@@ -1169,7 +1604,6 @@ async function sendMessage() {
         const params = JSON.parse(toolCall.function.arguments);
         const result = createMemoryFromTool(params);
         
-        // Send tool result back to model
         messages.push(choice.message);
         messages.push({
           role: 'tool',
@@ -1177,7 +1611,6 @@ async function sendMessage() {
           content: JSON.stringify(result)
         });
         
-        // Second API call to get final response
         const response2 = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -1189,8 +1622,7 @@ async function sendMessage() {
           body: JSON.stringify({
             model: chat.model,
             messages,
-            temperature: 1.0,
-            repetition_penalty: 1.15
+            temperature: 1.0
           })
         });
         
@@ -1203,32 +1635,29 @@ async function sendMessage() {
         showToast(`Memory saved: ${params.name}`);
       }
     } else {
-      // No tool call, just regular response
       const assistantMessage = choice.message.content;
       chat.messages.push({ role: 'assistant', content: assistantMessage });
       renderMessages();
       saveState();
     }
     
-    // Auto-name after second message
     if (chat.messages.filter(m => m.role === 'user').length === 1 && chat.title === 'New conversation') {
       setTimeout(() => autoNameChat(chat), 1000);
     }
     
   } catch (error) {
     showToast('Error: ' + error.message);
-    console.error(error);
-    chat.messages.pop();
+    if (!isRegenerate) chat.messages.pop();
     renderMessages();
   }
 }
 
 async function autoNameChat(chat) {
   try {
-    const userMessages = chat.messages.filter(m => m.role === 'user');
-    const assistantMessages = chat.messages.filter(m => m.role === 'assistant');
+    const userMsgs = chat.messages.filter(m => m.role === 'user');
+    const assistantMsgs = chat.messages.filter(m => m.role === 'assistant');
     
-    if (userMessages.length === 0 || assistantMessages.length === 0) return;
+    if (userMsgs.length === 0 || assistantMsgs.length === 0) return;
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -1240,7 +1669,7 @@ async function autoNameChat(chat) {
       body: JSON.stringify({
         model: chat.model,
         messages: [
-          { role: 'user', content: `Generate a concise 3-5 word title for this conversation:\n\nUser: ${userMessages[0].content}\n\nAssistant: ${assistantMessages[0].content}\n\nTitle (no quotes, no punctuation):` }
+          { role: 'user', content: `Generate a 3-5 word title:\n\nUser: ${userMsgs[0].content}\n\nAssistant: ${assistantMsgs[0].content}\n\nTitle:` }
         ],
         temperature: 0.7,
         max_tokens: 20
@@ -1261,7 +1690,105 @@ async function autoNameChat(chat) {
   }
 }
 
-// MEMORIES UI
+// SETTINGS
+function openSettings() {
+  document.getElementById('apiKeyInput').value = state.apiKey;
+  document.getElementById('groqKeyInput').value = state.groqKey;
+  document.getElementById('systemPromptInput').value = state.systemPrompt;
+  document.getElementById('modelSelect').value = state.model;
+  document.getElementById('settingsModal').classList.add('visible');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('visible');
+}
+
+function saveSettings() {
+  state.apiKey = document.getElementById('apiKeyInput').value.trim();
+  state.groqKey = document.getElementById('groqKeyInput').value.trim();
+  state.systemPrompt = document.getElementById('systemPromptInput').value.trim();
+  state.model = document.getElementById('modelSelect').value;
+  
+  const chat = getActiveChat();
+  if (chat) chat.model = state.model;
+  
+  saveState();
+  closeSettings();
+  showToast('Settings saved');
+}
+
+function populateModelSelect() {
+  const select = document.getElementById('modelSelect');
+  const grouped = {};
+  
+  MODELS.forEach(m => {
+    if (!grouped[m.provider]) grouped[m.provider] = [];
+    grouped[m.provider].push(m);
+  });
+  
+  select.innerHTML = Object.entries(grouped).map(([provider, models]) => `
+    <optgroup label="${provider}">
+      ${models.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
+    </optgroup>
+  `).join('');
+}
+
+// EXPORT/IMPORT
+function exportData() {
+  const data = {
+    version: 4,
+    exported: new Date().toISOString(),
+    chats: state.chats,
+    memories: state.memories,
+    projects: state.projects
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bloodink-export-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showToast('Data exported');
+}
+
+// SIDEBAR
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('visible');
+}
+
+// PERSISTENCE
+function saveState() {
+  localStorage.setItem('bloodink_v4', JSON.stringify(state));
+}
+
+function loadState() {
+  const saved = localStorage.getItem('bloodink_v4');
+  if (saved) {
+    state = { ...state, ...JSON.parse(saved) };
+  }
+}
+
+// UTILS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// MEMORIES MODAL FUNCTIONS
+let currentMemoryId = null;
+
 function openMemories() {
   renderMemoryList();
   document.getElementById('memoriesModal').classList.add('visible');
@@ -1275,25 +1802,23 @@ function closeMemories() {
 function renderMemoryList() {
   const list = document.getElementById('memoryList');
   if (state.memories.length === 0) {
-    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No memories yet. Bloodink will create them automatically as you share important information.</p>';
+    list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No memories yet. Bloodink will create them automatically as you share important information.</p>';
     return;
   }
   
   list.innerHTML = state.memories.map(mem => `
     <div class="memory-item">
-      <div class="memory-item-header">
-        <div class="memory-item-name">${escapeHtml(mem.name)}</div>
-      </div>
+      <div class="memory-item-name">${escapeHtml(mem.name)}</div>
       <div class="memory-item-meta">
         <span class="priority-${mem.priority}">${mem.priority}</span>
         ${mem.pinned ? ' • 📌 Pinned' : ''}
       </div>
       ${mem.keywords && mem.keywords.length > 0 ? `
-        <div class="memory-item-keywords">
+        <div style="margin: 8px 0;">
           ${mem.keywords.map(kw => `<span class="keyword-badge">${escapeHtml(kw)}</span>`).join('')}
         </div>
       ` : ''}
-      <div class="memory-item-actions">
+      <div style="margin-top: 8px;">
         <button class="btn-small" onclick="openMemoryEditor('${mem.id}')">Edit</button>
       </div>
     </div>
@@ -1374,95 +1899,28 @@ function deleteMemory() {
   showToast('Memory deleted');
 }
 
-// VOICE
-function toggleVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Voice input not supported');
-    return;
-  }
+// PROJECTS MODAL FUNCTIONS
+function createProject() {
+  const name = prompt('Project name:');
+  if (!name || !name.trim()) return;
   
-  if (!recognition) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      document.getElementById('inputField').value = transcript;
-      document.getElementById('inputField').dispatchEvent(new Event('input'));
-      document.getElementById('micButton').classList.remove('recording');
-    };
-    
-    recognition.onerror = () => {
-      document.getElementById('micButton').classList.remove('recording');
-      showToast('Voice input error');
-    };
-    
-    recognition.onend = () => {
-      document.getElementById('micButton').classList.remove('recording');
-    };
-  }
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3', '#ff9ff3'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
   
-  if (document.getElementById('micButton').classList.contains('recording')) {
-    recognition.stop();
-  } else {
-    recognition.start();
-    document.getElementById('micButton').classList.add('recording');
-  }
-}
-
-// SETTINGS
-function openSettings() {
-  document.getElementById('apiKeyInput').value = state.apiKey;
-  document.getElementById('systemPromptInput').value = state.systemPrompt;
-  document.getElementById('modelSelect').value = state.model;
-  document.getElementById('maxMemoriesInput').value = state.maxMemories;
-  document.getElementById('settingsModal').classList.add('visible');
-}
-
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('visible');
-}
-
-function saveSettings() {
-  state.apiKey = document.getElementById('apiKeyInput').value.trim();
-  state.systemPrompt = document.getElementById('systemPromptInput').value.trim();
-  state.model = document.getElementById('modelSelect').value;
-  state.maxMemories = parseInt(document.getElementById('maxMemoriesInput').value) || 3;
+  const project = {
+    id: Date.now().toString(),
+    name: name.trim(),
+    color
+  };
   
-  const chat = getActiveChat();
-  if (chat) chat.model = state.model;
-  
+  state.projects.push(project);
   saveState();
-  closeSettings();
-  showToast('Settings saved');
+  renderProjects();
+  showToast('Project created');
 }
 
-// PERSISTENCE
-function saveState() {
-  localStorage.setItem('bloodink_v3', JSON.stringify(state));
-}
-
-function loadState() {
-  const saved = localStorage.getItem('bloodink_v3');
-  if (saved) {
-    state = { ...state, ...JSON.parse(saved) };
-  }
-}
-
-// UTILS
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 3000);
+function closeProjects() {
+  document.getElementById('projectsModal').classList.remove('visible');
 }
 
 // START
