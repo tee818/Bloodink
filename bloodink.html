@@ -1032,8 +1032,7 @@ input[type="range"]::-moz-range-thumb {
     </div>
     <button class="sidebar-btn" onclick="createNewChat(); toggleSidebar()">+ New chat</button>
     <button class="sidebar-btn" onclick="openSearch(); toggleSidebar()">Search</button>
-    <button class="sidebar-btn" onclick="syncData(); toggleSidebar()">Sync to Cloud</button>
-    <button class="sidebar-btn" onclick="downloadFromGist(); toggleSidebar()">Download from Cloud</button>
+    <button class="sidebar-btn" onclick="syncData(); toggleSidebar()">Sync</button>
     <button class="sidebar-btn" onclick="openMemories()">Memories (<span id="memoryCount">0</span>)</button>
     <button class="sidebar-btn" onclick="openProjects()">Projects</button>
   </div>
@@ -2292,7 +2291,7 @@ function closeProjects() {
   document.getElementById('projectsModal').classList.remove('visible');
 }
 
-// GITHUB GIST SYNC
+// GITHUB GIST SYNC WITH MERGE
 async function syncData() {
   if (!state.gistToken) {
     showToast('Add GitHub token in settings first');
@@ -2302,15 +2301,92 @@ async function syncData() {
   
   showToast('Syncing...');
   
-  const syncData = {
-    version: 4,
-    synced: new Date().toISOString(),
-    chats: state.chats,
-    memories: state.memories,
-    projects: state.projects
-  };
-  
   try {
+    // Step 1: Download existing cloud data
+    let cloudChats = [];
+    let cloudMemories = [];
+    let cloudProjects = DEFAULT_PROJECTS;
+    
+    if (state.gistId) {
+      const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
+        headers: { 'Authorization': `token ${state.gistToken}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.files['bloodink-sync.json'].content;
+        const cloudData = JSON.parse(content);
+        cloudChats = cloudData.chats || [];
+        cloudMemories = cloudData.memories || [];
+        cloudProjects = cloudData.projects || DEFAULT_PROJECTS;
+      }
+    } else {
+      // Search for existing gist
+      const searchResponse = await fetch('https://api.github.com/gists', {
+        headers: { 'Authorization': `token ${state.gistToken}` }
+      });
+      
+      if (searchResponse.ok) {
+        const gists = await searchResponse.json();
+        const bloodinkGist = gists.find(g => 
+          g.description === 'Bloodink conversation sync' || 
+          g.files['bloodink-sync.json']
+        );
+        
+        if (bloodinkGist) {
+          state.gistId = bloodinkGist.id;
+          const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
+            headers: { 'Authorization': `token ${state.gistToken}` }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const content = data.files['bloodink-sync.json'].content;
+            const cloudData = JSON.parse(content);
+            cloudChats = cloudData.chats || [];
+            cloudMemories = cloudData.memories || [];
+            cloudProjects = cloudData.projects || DEFAULT_PROJECTS;
+          }
+        }
+      }
+    }
+    
+    // Step 2: Merge local and cloud data
+    const mergedChats = [...state.chats];
+    cloudChats.forEach(cloudChat => {
+      const localIndex = mergedChats.findIndex(c => c.id === cloudChat.id);
+      if (localIndex === -1) {
+        mergedChats.push(cloudChat);
+      } else {
+        if (cloudChat.messages.length > mergedChats[localIndex].messages.length) {
+          mergedChats[localIndex] = cloudChat;
+        }
+      }
+    });
+    
+    const mergedMemories = [...state.memories];
+    cloudMemories.forEach(cloudMem => {
+      const localIndex = mergedMemories.findIndex(m => m.id === cloudMem.id);
+      if (localIndex === -1) {
+        mergedMemories.push(cloudMem);
+      }
+    });
+    
+    // Step 3: Update local state
+    state.chats = mergedChats;
+    state.memories = mergedMemories;
+    state.projects = cloudProjects;
+    saveState();
+    
+    // Step 4: Upload merged data
+    const syncDataObj = {
+      version: 4,
+      synced: new Date().toISOString(),
+      chats: mergedChats,
+      memories: mergedMemories,
+      projects: cloudProjects
+    };
+    
     if (state.gistId) {
       const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
         method: 'PATCH',
@@ -2321,14 +2397,13 @@ async function syncData() {
         body: JSON.stringify({
           files: {
             'bloodink-sync.json': {
-              content: JSON.stringify(syncData, null, 2)
+              content: JSON.stringify(syncDataObj, null, 2)
             }
           }
         })
       });
       
       if (!response.ok) throw new Error('Sync failed');
-      showToast('Synced to cloud ✓');
     } else {
       const response = await fetch('https://api.github.com/gists', {
         method: 'POST',
@@ -2341,7 +2416,7 @@ async function syncData() {
           public: false,
           files: {
             'bloodink-sync.json': {
-              content: JSON.stringify(syncData, null, 2)
+              content: JSON.stringify(syncDataObj, null, 2)
             }
           }
         })
@@ -2352,73 +2427,15 @@ async function syncData() {
       const data = await response.json();
       state.gistId = data.id;
       saveState();
-      showToast('Synced to cloud ✓');
-    }
-  } catch (error) {
-    showToast('Sync failed: ' + error.message);
-  }
-}
-
-async function downloadFromGist() {
-  if (!state.gistToken) {
-    showToast('Add GitHub token in settings first');
-    openSettings();
-    return;
-  }
-  
-  showToast('Downloading...');
-  
-  try {
-    // If no gistId, search for Bloodink gist
-    if (!state.gistId) {
-      const searchResponse = await fetch('https://api.github.com/gists', {
-        headers: { 'Authorization': `token ${state.gistToken}` }
-      });
-      
-      if (!searchResponse.ok) throw new Error('Could not search for gists');
-      
-      const gists = await searchResponse.json();
-      const bloodinkGist = gists.find(g => 
-        g.description === 'Bloodink conversation sync' || 
-        g.files['bloodink-sync.json']
-      );
-      
-      if (!bloodinkGist) {
-        showToast('No Bloodink data found. Sync from your other device first.');
-        return;
-      }
-      
-      state.gistId = bloodinkGist.id;
-      saveState();
     }
     
-    // Download using gistId
-    const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
-      headers: { 'Authorization': `token ${state.gistToken}` }
-    });
-    
-    if (!response.ok) throw new Error('Download failed');
-    
-    const data = await response.json();
-    const content = data.files['bloodink-sync.json'].content;
-    const syncData = JSON.parse(content);
-    
-    state.chats = syncData.chats || [];
-    state.memories = syncData.memories || [];
-    state.projects = syncData.projects || DEFAULT_PROJECTS;
-    
-    saveState();
     renderChatList();
     updateMemoryCount();
     renderProjects();
+    showToast('Synced ✓');
     
-    if (state.chats.length > 0) {
-      switchChat(state.chats[0].id);
-    }
-    
-    showToast('Downloaded from cloud ✓');
   } catch (error) {
-    showToast('Download failed: ' + error.message);
+    showToast('Sync failed: ' + error.message);
   }
 }
 
