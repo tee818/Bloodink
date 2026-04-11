@@ -818,6 +818,8 @@ input[type="range"]::-moz-range-thumb {
   .welcome-logo { font-size: 48px; }
   .sidebar { width: 280px; }
   .header-right .new-chat-btn { display: none; }
+  .header-right .menu-btn[title="Search"],
+  .header-right .menu-btn[title="Sync"] { display: none; }
 }
 </style>
 </head>
@@ -910,6 +912,8 @@ input[type="range"]::-moz-range-thumb {
       </div>
     </div>
     <button class="sidebar-btn" onclick="createNewChat(); toggleSidebar()">+ New chat</button>
+    <button class="sidebar-btn" onclick="openSearch(); toggleSidebar()">Search</button>
+    <button class="sidebar-btn" onclick="syncData(); toggleSidebar()">Sync</button>
     <button class="sidebar-btn" onclick="openMemories()">Memories (<span id="memoryCount">0</span>)</button>
     <button class="sidebar-btn" onclick="openProjects()">Projects</button>
   </div>
