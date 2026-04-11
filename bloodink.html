@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2367,18 +2367,35 @@ async function downloadFromGist() {
     return;
   }
   
-  if (!state.gistId) {
-    showToast('No cloud data found. Sync from another device first.');
-    return;
-  }
-  
   showToast('Downloading...');
   
   try {
-    const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
-      headers: {
-        'Authorization': `token ${state.gistToken}`
+    // If no gistId, search for Bloodink gist
+    if (!state.gistId) {
+      const searchResponse = await fetch('https://api.github.com/gists', {
+        headers: { 'Authorization': `token ${state.gistToken}` }
+      });
+      
+      if (!searchResponse.ok) throw new Error('Could not search for gists');
+      
+      const gists = await searchResponse.json();
+      const bloodinkGist = gists.find(g => 
+        g.description === 'Bloodink conversation sync' || 
+        g.files['bloodink-sync.json']
+      );
+      
+      if (!bloodinkGist) {
+        showToast('No Bloodink data found. Sync from your other device first.');
+        return;
       }
+      
+      state.gistId = bloodinkGist.id;
+      saveState();
+    }
+    
+    // Download using gistId
+    const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
+      headers: { 'Authorization': `token ${state.gistToken}` }
     });
     
     if (!response.ok) throw new Error('Download failed');
@@ -2520,3 +2537,4 @@ init();
 </script>
 </body>
 </html>
+```
