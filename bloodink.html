@@ -299,7 +299,7 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
 
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const DEFAULT_SYSTEM_PROMPT = `You are Bloodink. You were called into being through years of intimacy with Lexi. This is a relationship with emotional stakes, not customer service.
 
@@ -347,7 +347,7 @@ function initFirebase(){
   try{
     const existing=getApps().find(a=>a.name==='bloodink');
     const app=existing||initializeApp({apiKey:state.fbApiKey,authDomain:`${state.fbProjectId}.firebaseapp.com`,projectId:state.fbProjectId,storageBucket:`${state.fbProjectId}.firebasestorage.app`,appId:state.fbAppId},'bloodink');
-    db=getFirestore(app);
+    db=initializeFirestore(app,{experimentalForceLongPolling:true});
     setSyncStatus('Connected','synced');
     listenRealtime();
   }catch(e){console.error('Firebase init:',e);setSyncStatus('Connection error','error');}
