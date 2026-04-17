@@ -508,6 +508,7 @@ html, body {
   font-size: 14px;
   color: var(--text-secondary);
   transition: all 0.2s;
+  position: relative;
 }
 
 .chat-item:hover {
@@ -541,7 +542,10 @@ html, body {
   font-size: 16px;
   opacity: 0;
   transition: all 0.2s;
-  float: right;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .chat-item:hover .delete-chat-btn {
@@ -1147,6 +1151,7 @@ input[type="range"]::-moz-range-thumb {
       </div>
     </div>
     <button class="sidebar-btn" onclick="createNewChat(); toggleSidebar()">+ New chat</button>
+    <button class="sidebar-btn" onclick="syncData(); toggleSidebar()">Sync</button>
     <button class="sidebar-btn" onclick="openSearch(); toggleSidebar()">Search</button>
     <button class="sidebar-btn" onclick="openMemories()">Memories (<span id="memoryCount">0</span>)</button>
     <button class="sidebar-btn" onclick="openMemoryEditor(null)">💭 Create Memory</button>
@@ -1498,7 +1503,7 @@ async function startApp() {
   
   // Auto-sync on open
   if (state.autoSync && state.gistToken) {
-    await syncData(true); // Silent sync
+    syncData(true).catch(err => console.error('Auto-sync on open failed:', err));
   }
   
   // Show homepage instead of auto-opening chat
@@ -2225,6 +2230,7 @@ async function sendMessage(isRegenerate = false) {
           content: assistantMessage,
           activeMemories: relevantMemories.map(m => m.name)
         });
+        chat.updatedAt = Date.now();
         renderMessages();
         saveState();
         showToast(`Memory saved: ${params.name}`);
@@ -2237,18 +2243,19 @@ async function sendMessage(isRegenerate = false) {
         content: assistantMessage,
         activeMemories: relevantMemories.map(m => m.name)
       });
+      chat.updatedAt = Date.now();
       renderMessages();
       saveState();
       
       // Background memory analysis for models without function calling
       if (!modelHasFunctionCalling) {
-        analyzeForMemories(chat.messages);
+        analyzeForMemories(chat.messages).catch(err => console.error('Background memory failed:', err));
       }
     }
     
-    // Auto-sync after message
+    // Auto-sync after message - CRITICAL FIX
     if (state.autoSync && state.gistToken) {
-      await syncData(true);
+      syncData(true).catch(err => console.error('Auto-sync after message failed:', err));
     }
     
     if (chat.messages.filter(m => m.role === 'user').length === 1 && chat.title === 'New conversation') {
@@ -2291,6 +2298,7 @@ async function autoNameChat(chat) {
       const title = data.choices[0].message.content.trim().replace(/['"]/g, '').substring(0, 50);
       if (title && title.length > 3) {
         chat.title = title;
+        chat.updatedAt = Date.now();
         renderChatList();
         saveState();
       }
@@ -2606,7 +2614,7 @@ function closeProjects() {
   document.getElementById('projectsModal').classList.remove('visible');
 }
 
-// GITHUB GIST SYNC WITH MERGE
+// GITHUB GIST SYNC WITH MERGE - FIXED VERSION
 async function syncData(silent = false) {
   if (!state.gistToken) {
     if (!silent) {
@@ -2616,8 +2624,18 @@ async function syncData(silent = false) {
     return;
   }
   
-  if (syncInProgress) return;
+  if (syncInProgress) {
+    console.log('Sync already in progress, skipping');
+    return;
+  }
+  
   syncInProgress = true;
+  
+  // Timeout failsafe - if sync takes more than 30 seconds, force reset
+  const timeoutId = setTimeout(() => {
+    console.error('Sync timeout - force resetting syncInProgress');
+    syncInProgress = false;
+  }, 30000);
   
   console.log('=== SYNC STARTED ===');
   console.log('Local gistId:', state.gistId);
@@ -2806,7 +2824,9 @@ async function syncData(silent = false) {
     console.error(error);
     if (!silent) showToast('Sync failed: ' + error.message);
   } finally {
+    clearTimeout(timeoutId);
     syncInProgress = false;
+    console.log('syncInProgress reset to false');
   }
 }
 
