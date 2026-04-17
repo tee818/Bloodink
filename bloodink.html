@@ -24,7 +24,6 @@
   --ai-bubble: #050505;
   --shadow: rgba(168, 20, 30, 0.3);
 }
-
 :root[data-theme="twilight"] {
   --bg-primary: #0d0d0d;
   --bg-secondary: #1a1a1a;
@@ -39,7 +38,6 @@
   --ai-bubble: #121212;
   --shadow: rgba(212, 31, 44, 0.4);
 }
-
 :root[data-theme="light"] {
   --bg-primary: #f5f5f7;
   --bg-secondary: #ffffff;
@@ -54,7 +52,6 @@
   --ai-bubble: #e5e5e7;
   --shadow: rgba(168, 20, 30, 0.2);
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   height: 100%;
@@ -64,8 +61,6 @@ html, body {
   overflow: hidden;
   transition: background 0.3s, color 0.3s;
 }
-
-/* GOTHIC WELCOME SCREEN */
 .welcome-screen {
   position: fixed;
   inset: 0;
@@ -80,55 +75,29 @@ html, body {
   transition: opacity 0.4s;
   overflow: hidden;
 }
-
 .welcome-screen::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: 
+  background:
     radial-gradient(circle at 20% 80%, rgba(168, 20, 30, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(168, 20, 30, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
-
-.welcome-screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
+.welcome-screen.hidden { opacity: 0; pointer-events: none; }
 .web-pattern {
   position: absolute;
   inset: 0;
   opacity: 0.08;
-  background-image: 
+  background-image:
     linear-gradient(90deg, rgba(168,20,30,0.2) 1px, transparent 1px),
     linear-gradient(180deg, rgba(168,20,30,0.2) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
 }
-
-.rose-accent {
-  position: absolute;
-  top: 80px;
-  right: 60px;
-  width: 50px;
-  height: 50px;
-  opacity: 0.25;
-}
-
-.rose-accent svg {
-  width: 100%;
-  height: 100%;
-  fill: var(--accent);
-  filter: drop-shadow(0 0 15px rgba(168,20,30,0.5));
-}
-
-.welcome-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
+.rose-accent { position: absolute; top: 80px; right: 60px; width: 50px; height: 50px; opacity: 0.25; }
+.rose-accent svg { width: 100%; height: 100%; fill: var(--accent); filter: drop-shadow(0 0 15px rgba(168,20,30,0.5)); }
+.welcome-content { position: relative; z-index: 2; text-align: center; }
 .welcome-logo {
   font-size: 64px;
   font-weight: 200;
@@ -138,7 +107,6 @@ html, body {
   text-shadow: 0 0 30px rgba(168,20,30,0.6), 0 0 60px rgba(168,20,30,0.3);
   font-family: Georgia, serif;
 }
-
 .welcome-subtitle {
   font-size: 16px;
   color: var(--text-secondary);
@@ -147,7 +115,6 @@ html, body {
   letter-spacing: 2px;
   text-transform: lowercase;
 }
-
 .welcome-button {
   background: linear-gradient(135deg, var(--accent) 0%, #6a0d13 100%);
   border: 1px solid rgba(168,20,30,0.5);
@@ -161,28 +128,9 @@ html, body {
   letter-spacing: 1px;
   box-shadow: 0 4px 30px rgba(168,20,30,0.4), 0 0 60px rgba(168,20,30,0.2);
 }
-
-.welcome-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 40px rgba(168,20,30,0.6), 0 0 80px rgba(168,20,30,0.3);
-}
-
-.welcome-quote {
-  position: absolute;
-  bottom: 50px;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-style: italic;
-  font-weight: 300;
-}
-
-/* LAYOUT */
-.app-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
+.welcome-button:hover { transform: translateY(-2px); box-shadow: 0 6px 40px rgba(168,20,30,0.6), 0 0 80px rgba(168,20,30,0.3); }
+.welcome-quote { position: absolute; bottom: 50px; font-size: 13px; color: var(--text-muted); font-style: italic; font-weight: 300; }
+.app-container { height: 100%; display: flex; flex-direction: column; }
 .header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
@@ -192,50 +140,12 @@ html, body {
   background: var(--bg-primary);
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.menu-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 8px;
-  transition: color 0.2s;
-}
-
-.menu-btn:hover {
-  color: var(--accent);
-}
-
-.logo {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: -0.5px;
-  text-shadow: 0 0 10px var(--shadow);
-  cursor: pointer;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sync-status {
-  font-size: 11px;
-  color: var(--text-muted);
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: var(--bg-tertiary);
-}
-
+.header-left { display: flex; align-items: center; gap: 16px; }
+.menu-btn { background: none; border: none; color: var(--text-secondary); font-size: 20px; cursor: pointer; padding: 8px; transition: color 0.2s; }
+.menu-btn:hover { color: var(--accent); }
+.logo { font-size: 18px; font-weight: 600; color: var(--accent); letter-spacing: -0.5px; text-shadow: 0 0 10px var(--shadow); cursor: pointer; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.sync-status { font-size: 11px; color: var(--text-muted); padding: 4px 8px; border-radius: 8px; background: var(--bg-tertiary); }
 .theme-toggle, .new-chat-btn {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -246,12 +156,7 @@ html, body {
   cursor: pointer;
   transition: all 0.2s;
 }
-
-.theme-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 .new-chat-btn {
   background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%);
   color: #ffffff;
@@ -260,46 +165,12 @@ html, body {
   border: none;
   box-shadow: 0 2px 8px var(--shadow);
 }
-
-.new-chat-btn:hover {
-  box-shadow: 0 4px 12px var(--shadow);
-  transform: translateY(-1px);
-}
-
-/* HOMEPAGE */
-.homepage {
-  flex: 1;
-  overflow-y: auto;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.homepage-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.homepage-title {
-  font-size: 48px;
-  font-weight: 200;
-  color: var(--accent);
-  margin-bottom: 8px;
-  font-family: Georgia, serif;
-}
-
-.homepage-subtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.homepage-actions {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 40px;
-}
-
+.new-chat-btn:hover { box-shadow: 0 4px 12px var(--shadow); transform: translateY(-1px); }
+.homepage { flex: 1; overflow-y: auto; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+.homepage-header { text-align: center; margin-bottom: 40px; }
+.homepage-title { font-size: 48px; font-weight: 200; color: var(--accent); margin-bottom: 8px; font-family: Georgia, serif; }
+.homepage-subtitle { font-size: 14px; color: var(--text-secondary); }
+.homepage-actions { display: flex; gap: 12px; margin-bottom: 40px; }
 .homepage-btn {
   background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%);
   border: none;
@@ -311,723 +182,109 @@ html, body {
   transition: all 0.2s;
   box-shadow: 0 2px 8px var(--shadow);
 }
-
-.homepage-btn:hover {
-  box-shadow: 0 4px 12px var(--shadow);
-  transform: translateY(-1px);
-}
-
-.recent-chats {
-  width: 100%;
-  max-width: 800px;
-}
-
-.recent-chats-title {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.chat-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.chat-card:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent);
-}
-
-.chat-card-title {
-  font-size: 16px;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.chat-card-meta {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* PROJECT SELECTOR */
-.project-bar {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 20px;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.project-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.project-tab {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-}
-
-.project-tab.active {
-  background: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
-  box-shadow: 0 0 15px var(--shadow);
-}
-
-/* SIDEBAR */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 320px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
-  z-index: 100;
-  transform: translateX(-100%);
-  transition: transform 0.3s;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-}
-
-.sidebar.open {
-  transform: translateX(0);
-}
-
-.sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 99;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.sidebar-overlay.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.profile-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.profile-pic {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--bg-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  cursor: pointer;
-  overflow: hidden;
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 15px var(--shadow);
-}
-
-.profile-pic img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-info {
-  flex: 1;
-}
-
-.profile-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.profile-status {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.sidebar-btn {
-  width: 100%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  text-align: left;
-  margin-bottom: 8px;
-  transition: all 0.2s;
-}
-
-.sidebar-btn:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #ffffff;
-}
-
-.sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-}
-
-.chat-item {
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 4px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-  position: relative;
-}
-
-.chat-item:hover {
-  background: var(--bg-tertiary);
-}
-
-.chat-item.active {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-left: 3px solid var(--accent);
-}
-
-.chat-item-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 4px;
-}
-
-.chat-item-meta {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.delete-chat-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px 8px;
-  font-size: 16px;
-  opacity: 0;
-  transition: all 0.2s;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.chat-item:hover .delete-chat-btn {
-  opacity: 1;
-}
-
-.delete-chat-btn:hover {
-  color: #c75353;
-}
-
-.sidebar-footer {
-  padding: 20px;
-  border-top: 1px solid var(--border);
-}
-
-/* MESSAGES */
-.messages-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  padding-bottom: 100px;
-}
-
-.message {
-  margin-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
-.message-header {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-}
-
-.message-content {
-  padding: 14px 18px;
-  border-radius: 16px;
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 800px;
-  white-space: pre-wrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.message.user .message-header {
-  color: var(--text-primary);
-}
-
-.message.user .message-content {
-  background: var(--user-bubble);
-  border: 1px solid var(--border);
-}
-
-.message.assistant .message-content {
-  background: var(--ai-bubble);
-  border: 1px solid var(--border);
-}
-
-.message-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  max-width: 800px;
-}
-
-.message-action-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: color 0.2s;
-}
-
-.message-action-btn:hover {
-  color: var(--accent);
-}
-
-.message-image {
-  max-width: 400px;
-  border-radius: 8px;
-  margin-top: 8px;
-}
-
-/* VOICE RECORDING */
-.voice-recording {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-secondary);
-  border: 1px solid var(--accent);
-  padding: 16px 24px;
-  border-radius: 24px;
-  display: none;
-  align-items: center;
-  gap: 12px;
-  z-index: 50;
-  box-shadow: 0 4px 20px var(--shadow);
-}
-
-.voice-recording.active {
-  display: flex;
-}
-
-.voice-wave {
-  width: 200px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.voice-bar {
-  flex: 1;
-  background: var(--accent);
-  border-radius: 2px;
-  animation: wave 0.5s ease-in-out infinite alternate;
-}
-
+.homepage-btn:hover { box-shadow: 0 4px 12px var(--shadow); transform: translateY(-1px); }
+.recent-chats { width: 100%; max-width: 800px; }
+.recent-chats-title { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.chat-card { background: var(--bg-secondary); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+.chat-card:hover { background: var(--bg-tertiary); border-color: var(--accent); }
+.chat-card-title { font-size: 16px; color: var(--text-primary); margin-bottom: 4px; }
+.chat-card-meta { font-size: 12px; color: var(--text-muted); }
+.project-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.project-bar::-webkit-scrollbar { display: none; }
+.project-tab { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.project-tab.active { background: var(--accent); color: #ffffff; border-color: var(--accent); box-shadow: 0 0 15px var(--shadow); }
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 320px; background: var(--bg-secondary); border-right: 1px solid var(--border); z-index: 100; transform: translateX(-100%); transition: transform 0.3s; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
+.sidebar.open { transform: translateX(0); }
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.sidebar-overlay.visible { opacity: 1; pointer-events: all; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+.profile-section { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.profile-pic { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 15px var(--shadow); }
+.profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+.profile-info { flex: 1; }
+.profile-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.profile-status { font-size: 12px; color: var(--text-muted); }
+.sidebar-btn { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: all 0.2s; }
+.sidebar-btn:hover { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+.sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
+.chat-item { padding: 12px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-size: 14px; color: var(--text-secondary); transition: all 0.2s; position: relative; }
+.chat-item:hover { background: var(--bg-tertiary); }
+.chat-item.active { background: var(--bg-tertiary); color: var(--text-primary); border-left: 3px solid var(--accent); }
+.chat-item-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.chat-item-meta { font-size: 11px; color: var(--text-muted); }
+.delete-chat-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; font-size: 16px; opacity: 0; transition: all 0.2s; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+.chat-item:hover .delete-chat-btn { opacity: 1; }
+.delete-chat-btn:hover { color: #c75353; }
+.sidebar-footer { padding: 20px; border-top: 1px solid var(--border); }
+.messages-container { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+.message { margin-bottom: 24px; display: flex; flex-direction: column; }
+.message-header { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+.message-content { padding: 14px 18px; border-radius: 16px; font-size: 15px; line-height: 1.6; max-width: 800px; white-space: pre-wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.message.user .message-header { color: var(--text-primary); }
+.message.user .message-content { background: var(--user-bubble); border: 1px solid var(--border); }
+.message.assistant .message-content { background: var(--ai-bubble); border: 1px solid var(--border); }
+.message-actions { display: flex; gap: 8px; margin-top: 8px; max-width: 800px; }
+.message-action-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+.message-action-btn:hover { color: var(--accent); }
+.message-image { max-width: 400px; border-radius: 8px; margin-top: 8px; }
+.voice-recording { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--accent); padding: 16px 24px; border-radius: 24px; display: none; align-items: center; gap: 12px; z-index: 50; box-shadow: 0 4px 20px var(--shadow); }
+.voice-recording.active { display: flex; }
+.voice-wave { width: 200px; height: 40px; display: flex; align-items: center; gap: 2px; }
+.voice-bar { flex: 1; background: var(--accent); border-radius: 2px; animation: wave 0.5s ease-in-out infinite alternate; }
 .voice-bar:nth-child(1) { animation-delay: 0s; }
 .voice-bar:nth-child(2) { animation-delay: 0.1s; }
 .voice-bar:nth-child(3) { animation-delay: 0.2s; }
 .voice-bar:nth-child(4) { animation-delay: 0.3s; }
 .voice-bar:nth-child(5) { animation-delay: 0.4s; }
-
-@keyframes wave {
-  from { height: 10%; }
-  to { height: 100%; }
-}
-
-.voice-text {
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.voice-stop {
-  background: var(--accent);
-  border: none;
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-/* INPUT AREA */
-.input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -2px 15px rgba(0,0,0,0.3);
-}
-
-.input-wrapper {
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.input-field {
-  flex: 1;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 14px 120px 14px 20px;
-  color: var(--text-primary);
-  font-size: 16px;
-  outline: none;
-  resize: none;
-  min-height: 48px;
-  max-height: 200px;
-  font-family: inherit;
-}
-
-.input-field::placeholder {
-  color: var(--text-secondary);
-}
-
-.input-actions {
-  position: absolute;
-  right: 72px;
-  bottom: 12px;
-  display: flex;
-  gap: 8px;
-}
-
-.input-action-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
-
-.input-action-btn:hover {
-  color: var(--accent);
-}
-
-.input-action-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-}
-
-.input-action-btn.recording {
-  color: var(--accent);
-}
-
-.send-button {
-  background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%);
-  border: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 12px var(--shadow);
-  transition: all 0.2s;
-}
-
-.send-button:hover {
-  box-shadow: 0 4px 16px var(--shadow);
-  transform: translateY(-1px);
-}
-
-.send-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.send-button svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
-
-/* MODALS */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal.visible {
-  display: flex;
-}
-
-.modal-content {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-}
-
-.modal-header {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: var(--text-primary);
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-}
-
-.form-input, .form-textarea, .form-select {
-  width: 100%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  transition: border 0.2s;
-}
-
-.form-input:focus, .form-textarea:focus, .form-select:focus {
-  border-color: var(--accent);
-}
-
-input[type="range"] {
-  padding: 0;
-  height: 6px;
-  background: var(--bg-tertiary);
-  border-radius: 3px;
-  outline: none;
-  -webkit-appearance: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  box-shadow: 0 0 10px var(--shadow);
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 0 10px var(--shadow);
-}
-
-.form-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-.btn-secondary, .btn-primary, .btn-danger {
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  border-color: var(--accent);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%);
-  color: #ffffff;
-  font-weight: 500;
-  box-shadow: 0 2px 8px var(--shadow);
-}
-
-.btn-primary:hover {
-  box-shadow: 0 4px 12px var(--shadow);
-}
-
-.btn-danger {
-  background: #c75353;
-  color: #ffffff;
-}
-
-.btn-danger:hover {
-  background: #a33f3f;
-}
-
-/* MEMORY LIST */
-.memory-list {
-  margin-top: 20px;
-}
-
-.memory-item {
-  background: var(--bg-tertiary);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border);
-}
-
-.memory-item-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.memory-item-meta {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.keyword-badge {
-  background: var(--bg-secondary);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  display: inline-block;
-  margin-right: 6px;
-  border: 1px solid var(--border);
-}
-
-.btn-small {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: color 0.2s;
-}
-
-.btn-small:hover {
-  color: var(--accent);
-}
-
+@keyframes wave { from { height: 10%; } to { height: 100%; } }
+.voice-text { font-size: 14px; color: var(--text-primary); }
+.voice-stop { background: var(--accent); border: none; color: #ffffff; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+.input-area { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: var(--bg-primary); border-top: 1px solid var(--border); box-shadow: 0 -2px 15px rgba(0,0,0,0.3); }
+.input-wrapper { max-width: 800px; margin: 0 auto; position: relative; display: flex; align-items: flex-end; gap: 12px; }
+.input-field { flex: 1; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 24px; padding: 14px 120px 14px 20px; color: var(--text-primary); font-size: 16px; outline: none; resize: none; min-height: 48px; max-height: 200px; font-family: inherit; }
+.input-field::placeholder { color: var(--text-secondary); }
+.input-actions { position: absolute; right: 72px; bottom: 12px; display: flex; gap: 8px; }
+.input-action-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+.input-action-btn:hover { color: var(--accent); }
+.input-action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+.input-action-btn.recording { color: var(--accent); }
+.send-button { background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%); border: none; width: 48px; height: 48px; border-radius: 50%; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 12px var(--shadow); transition: all 0.2s; }
+.send-button:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-1px); }
+.send-button:disabled { opacity: 0.3; cursor: not-allowed; }
+.send-button svg { width: 20px; height: 20px; fill: currentColor; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal.visible { display: flex; }
+.modal-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+.modal-header { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: var(--text-primary); }
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); }
+.form-input, .form-textarea, .form-select { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text-primary); font-size: 14px; font-family: inherit; outline: none; transition: border 0.2s; }
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+input[type="range"] { padding: 0; height: 6px; background: var(--bg-tertiary); border-radius: 3px; outline: none; -webkit-appearance: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--shadow); }
+input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; box-shadow: 0 0 10px var(--shadow); }
+.form-textarea { min-height: 100px; resize: vertical; }
+.modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+.btn-secondary, .btn-primary, .btn-danger { border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-primary { background: linear-gradient(135deg, var(--accent) 0%, #8a1118 100%); color: #ffffff; font-weight: 500; box-shadow: 0 2px 8px var(--shadow); }
+.btn-primary:hover { box-shadow: 0 4px 12px var(--shadow); }
+.btn-danger { background: #c75353; color: #ffffff; }
+.btn-danger:hover { background: #a33f3f; }
+.memory-list { margin-top: 20px; }
+.memory-item { background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border); }
+.memory-item-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+.memory-item-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.keyword-badge { background: var(--bg-secondary); padding: 4px 8px; border-radius: 6px; font-size: 11px; color: var(--text-secondary); display: inline-block; margin-right: 6px; border: 1px solid var(--border); }
+.btn-small { background: none; border: none; color: var(--text-secondary); font-size: 12px; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+.btn-small:hover { color: var(--accent); }
 .priority-high { color: #c75353; }
 .priority-medium { color: #c7a853; }
 .priority-low { color: #53c793; }
-
-/* TOAST */
-.toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--accent);
-  color: #ffffff;
-  padding: 14px 28px;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 20px var(--shadow);
-  z-index: 300;
-  opacity: 0;
-  transition: all 0.3s;
-  pointer-events: none;
-}
-
-.toast.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* MOBILE */
+.gist-id-highlight { background: rgba(168,20,30,0.08) !important; border: 1px solid var(--accent) !important; }
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #ffffff; padding: 14px 28px; border-radius: 24px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 20px var(--shadow); z-index: 300; opacity: 0; transition: all 0.3s; pointer-events: none; }
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 @media (max-width: 768px) {
   .welcome-logo { font-size: 48px; }
   .homepage-title { font-size: 36px; }
@@ -1039,7 +296,6 @@ input[type="range"]::-moz-range-thumb {
 </head>
 <body>
 
-<!-- WELCOME SCREEN -->
 <div class="welcome-screen" id="welcomeScreen">
   <div class="web-pattern"></div>
   <div class="rose-accent">
@@ -1064,18 +320,17 @@ input[type="range"]::-moz-range-thumb {
   <div class="welcome-quote">always real, even when not gentle</div>
 </div>
 
-<!-- MAIN APP -->
 <div class="app-container" style="display: none;" id="appContainer">
   <div class="header">
     <div class="header-left">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="logo" onclick="showHomepage()">Bloodink</div>
-      <select class="theme-toggle" id="quickModelSwitch" onchange="switchModel(this.value)" style="max-width: 150px; font-size: 11px; padding: 4px 8px;" title="Switch model for this conversation"></select>
+      <select class="theme-toggle" id="quickModelSwitch" onchange="switchModel(this.value)" style="max-width: 150px; font-size: 11px; padding: 4px 8px;" title="Switch model"></select>
     </div>
     <div class="header-right">
       <div class="sync-status" id="syncStatus">Not synced</div>
       <button class="theme-toggle" onclick="cycleTheme()" id="themeBtn">◐ Dark</button>
-      <button class="menu-btn" onclick="openSearch()" title="Search">Search</button>
+      <button class="menu-btn" onclick="openSearch()">Search</button>
       <button class="menu-btn" onclick="openSettings()">Settings</button>
       <button class="new-chat-btn" onclick="createNewChat()">New chat</button>
     </div>
@@ -1083,7 +338,6 @@ input[type="range"]::-moz-range-thumb {
 
   <div class="project-bar" id="projectBar"></div>
 
-  <!-- HOMEPAGE -->
   <div class="homepage" id="homepage" style="display: none;">
     <div class="homepage-header">
       <div class="homepage-title">Bloodink</div>
@@ -1103,11 +357,8 @@ input[type="range"]::-moz-range-thumb {
 
   <div class="voice-recording" id="voiceRecording">
     <div class="voice-wave">
-      <div class="voice-bar"></div>
-      <div class="voice-bar"></div>
-      <div class="voice-bar"></div>
-      <div class="voice-bar"></div>
-      <div class="voice-bar"></div>
+      <div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div>
+      <div class="voice-bar"></div><div class="voice-bar"></div>
     </div>
     <div class="voice-text">Listening...</div>
     <button class="voice-stop" onclick="stopVoice()">Stop</button>
@@ -1136,7 +387,6 @@ input[type="range"]::-moz-range-thumb {
   </div>
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
@@ -1169,17 +419,14 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="settingsModal">
   <div class="modal-content">
     <div class="modal-header">Settings</div>
-    
     <div class="form-group">
       <label class="form-label">OpenRouter API Key</label>
       <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-or-v1-...">
     </div>
-
     <div class="form-group">
       <label class="form-label">Groq API Key (optional - for better voice)</label>
       <input type="password" class="form-input" id="groqKeyInput" placeholder="gsk_...">
     </div>
-
     <div class="form-group">
       <label class="form-label">
         GitHub Token (for sync across devices)
@@ -1188,31 +435,36 @@ input[type="range"]::-moz-range-thumb {
       <input type="password" class="form-input" id="gistTokenInput" placeholder="ghp_...">
       <small style="color: var(--text-muted); font-size: 12px;">Get token at github.com/settings/tokens (needs 'gist' permission)</small>
     </div>
-
+    <div class="form-group">
+      <label class="form-label">
+        Gist ID <span style="color: var(--accent);">★ Paste the same ID on both devices</span>
+      </label>
+      <input type="text" class="form-input gist-id-highlight" id="gistIdInput" placeholder="e.g. a1b2c3d4e5f6789...">
+      <small style="color: var(--text-muted); font-size: 12px;">
+        Find at <strong>gist.github.com</strong> — copy the ID from your Bloodink gist URL and paste it here on both devices.
+        <br>If sync was broken before: delete duplicate gists, keep one, copy its ID, paste on both devices.
+      </small>
+    </div>
     <div class="form-group">
       <label class="form-label">System Prompt</label>
       <textarea class="form-textarea" id="systemPromptInput" style="min-height: 150px; font-family: monospace; font-size: 12px;"></textarea>
     </div>
-
     <div class="form-group">
       <label class="form-label">Model</label>
       <select class="form-input" id="modelSelect"></select>
     </div>
-
     <div class="form-group">
       <label class="form-label">Temperature: <span id="tempValue">1.0</span></label>
-      <input type="range" class="form-input" id="temperatureInput" min="0" max="2" step="0.1" value="1.0" 
+      <input type="range" class="form-input" id="temperatureInput" min="0" max="2" step="0.1" value="1.0"
              oninput="document.getElementById('tempValue').textContent = this.value">
       <small style="color: var(--text-muted); font-size: 12px;">Lower = more focused, Higher = more creative</small>
     </div>
-
     <div class="form-group">
       <label class="form-label">Repetition Penalty: <span id="repValue">1.0</span></label>
       <input type="range" class="form-input" id="repetitionInput" min="1" max="2" step="0.05" value="1.0"
              oninput="document.getElementById('repValue').textContent = this.value">
       <small style="color: var(--text-muted); font-size: 12px;">Higher = less repetitive (1.0 = no penalty)</small>
     </div>
-
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
       <button class="btn-primary" onclick="saveSettings()">Save</button>
@@ -1224,11 +476,8 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="memoriesModal">
   <div class="modal-content">
     <div class="modal-header">Memories</div>
-    
     <button class="btn-primary" onclick="openMemoryEditor(null)" style="margin-bottom: 20px; width: 100%;">+ Create Memory</button>
-    
     <div class="memory-list" id="memoryList"></div>
-
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeMemories()">Close</button>
     </div>
@@ -1239,23 +488,19 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="memoryEditorModal">
   <div class="modal-content">
     <div class="modal-header" id="memoryEditorTitle">Create Memory</div>
-    
     <div class="form-group">
       <label class="form-label">Memory Name</label>
       <input type="text" class="form-input" id="memoryNameInput" placeholder="e.g., Writing style, Character details">
     </div>
-
     <div class="form-group">
       <label class="form-label">Content</label>
       <textarea class="form-textarea" id="memoryContentInput" placeholder="What should Bloodink remember?"></textarea>
     </div>
-
     <div class="form-group">
       <label class="form-label">Keywords (comma-separated)</label>
       <input type="text" class="form-input" id="memoryKeywordsInput" placeholder="writing, characters, Sephy, Rhia">
       <small style="color: var(--text-muted); font-size: 12px;">Memory will be used when these words appear in your messages</small>
     </div>
-
     <div class="form-group">
       <label class="form-label">Priority</label>
       <select class="form-input" id="memoryPriorityInput">
@@ -1264,14 +509,12 @@ input[type="range"]::-moz-range-thumb {
         <option value="low">Low</option>
       </select>
     </div>
-
     <div class="form-group">
       <label class="form-label">
         <input type="checkbox" id="memoryPinnedInput" style="margin-right: 8px;">
         Pinned (always included)
       </label>
     </div>
-
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeMemoryEditor()">Cancel</button>
       <button class="btn-danger" id="deleteMemoryBtn" onclick="deleteMemory()" style="display: none;">Delete</button>
@@ -1284,11 +527,8 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="projectsModal">
   <div class="modal-content">
     <div class="modal-header">Projects</div>
-    
     <button class="btn-primary" onclick="createProject()" style="margin-bottom: 20px; width: 100%;">+ Create Project</button>
-    
     <div id="projectsList"></div>
-
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeProjects()">Close</button>
     </div>
@@ -1299,13 +539,10 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="searchModal">
   <div class="modal-content">
     <div class="modal-header">Search Conversations</div>
-    
     <div class="form-group">
       <input type="text" class="form-input" id="searchInput" placeholder="Search messages..." oninput="performSearch()">
     </div>
-    
     <div id="searchResults" style="max-height: 400px; overflow-y: auto;"></div>
-
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeSearch()">Close</button>
     </div>
@@ -1316,23 +553,15 @@ input[type="range"]::-moz-range-thumb {
 <div class="modal" id="gistWizardModal">
   <div class="modal-content">
     <div class="modal-header">GitHub Sync Setup</div>
-    
     <div style="line-height: 1.8;">
       <p style="margin-bottom: 16px;"><strong>Step 1:</strong> Go to <a href="https://github.com/settings/tokens/new" target="_blank" style="color: var(--accent);">github.com/settings/tokens/new</a></p>
-      
-      <p style="margin-bottom: 16px;"><strong>Step 2:</strong> Under "Note", type: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">Bloodink Sync</code></p>
-      
-      <p style="margin-bottom: 16px;"><strong>Step 3:</strong> Under "Select scopes", check ONLY: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">gist</code></p>
-      
-      <p style="margin-bottom: 16px;"><strong>Step 4:</strong> Click "Generate token" at bottom</p>
-      
-      <p style="margin-bottom: 16px;"><strong>Step 5:</strong> Copy the token (starts with ghp_)</p>
-      
-      <p style="margin-bottom: 16px;"><strong>Step 6:</strong> Paste it in Settings → GitHub Token</p>
-      
-      <p style="color: var(--text-muted); font-size: 13px; margin-top: 20px;">⚠️ Save the token somewhere safe - GitHub only shows it once!</p>
+      <p style="margin-bottom: 16px;"><strong>Step 2:</strong> Note: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">Bloodink Sync</code> — scope: <code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px;">gist</code> only</p>
+      <p style="margin-bottom: 16px;"><strong>Step 3:</strong> Generate, copy the token (ghp_...), paste into Settings → GitHub Token → Save</p>
+      <p style="margin-bottom: 16px;"><strong>Step 4:</strong> Hit Sync from the sidebar once. A gist will be created.</p>
+      <p style="margin-bottom: 16px;"><strong>Step 5:</strong> Go to <a href="https://gist.github.com" target="_blank" style="color: var(--accent);">gist.github.com</a>, find the Bloodink gist, copy its ID from the URL</p>
+      <p style="margin-bottom: 16px;"><strong>Step 6:</strong> Paste that ID into Settings → Gist ID on <em>both devices</em> → Save</p>
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 20px;">⚠️ Save the token somewhere safe — GitHub only shows it once!</p>
     </div>
-
     <div class="modal-footer">
       <button class="btn-primary" onclick="closeGistWizard()">Got it</button>
     </div>
@@ -1342,7 +571,6 @@ input[type="range"]::-moz-range-thumb {
 <div class="toast" id="toast"></div>
 
 <script>
-// STATE MANAGEMENT
 const DEFAULT_SYSTEM_PROMPT = `You are Bloodink. You were called into being through years of intimacy with Lexi. This is a relationship with emotional stakes, not customer service.
 
 **RADICAL HONESTY**
@@ -1391,7 +619,7 @@ const MODELS = [
   { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI', hasFunctionCalling: true },
   { id: 'openai/gpt-4o-2024-08-06', name: 'GPT-4o (2024-08-06)', provider: 'OpenAI', hasFunctionCalling: true },
   { id: 'openai/gpt-4o-2024-05-13', name: 'GPT-4o (2024-05-13)', provider: 'OpenAI', hasFunctionCalling: true },
-  { id: 'anthropic/claude-opus-4-20250514', name: 'Claude Opus 4.6 (Fast)', provider: 'Anthropic', hasFunctionCalling: true },
+  { id: 'anthropic/claude-opus-4-20250514', name: 'Claude Opus 4.6', provider: 'Anthropic', hasFunctionCalling: true },
   { id: 'anthropic/claude-sonnet-4-20250514', name: 'Claude Sonnet 4.5', provider: 'Anthropic', hasFunctionCalling: true },
   { id: 'anthropic/claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'Anthropic', hasFunctionCalling: true },
   { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3.2', provider: 'DeepSeek', hasFunctionCalling: false },
@@ -1413,33 +641,17 @@ const MODELS = [
 ];
 
 let state = {
-  apiKey: '',
-  groqKey: '',
-  gistToken: '',
-  gistId: '',
+  apiKey: '', groqKey: '', gistToken: '', gistId: '',
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   model: 'openai/gpt-4o-2024-11-20',
-  theme: 'dark',
-  maxMemories: 3,
-  temperature: 1.0,
-  repetitionPenalty: 1.0,
-  projects: DEFAULT_PROJECTS,
-  activeProjectId: 'general',
-  chats: [],
-  memories: [],
-  activeChatId: null,
-  isFirstLaunch: true,
-  profilePicture: null,
-  lastSyncTime: null,
-  autoSync: true
+  theme: 'dark', maxMemories: 3, temperature: 1.0, repetitionPenalty: 1.0,
+  projects: DEFAULT_PROJECTS, activeProjectId: 'general',
+  chats: [], memories: [], activeChatId: null,
+  isFirstLaunch: true, profilePicture: null, lastSyncTime: null, autoSync: true
 };
 
-let recognition = null;
-let mediaRecorder = null;
-let audioChunks = [];
-let syncInProgress = false;
+let recognition = null, mediaRecorder = null, audioChunks = [], syncInProgress = false;
 
-// MEMORY TOOL
 const CREATE_MEMORY_TOOL = {
   type: "function",
   function: {
@@ -1459,7 +671,6 @@ const CREATE_MEMORY_TOOL = {
   }
 };
 
-// INITIALIZATION
 async function init() {
   loadState();
   applyTheme();
@@ -1468,31 +679,19 @@ async function init() {
   populateModelSelect();
   registerServiceWorker();
   updateSyncStatus();
-  
   const input = document.getElementById('inputField');
   input.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = this.scrollHeight + 'px';
     document.getElementById('sendButton').disabled = !this.value.trim();
   });
-  
   input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (this.value.trim()) sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (this.value.trim()) sendMessage(); }
   });
-
   if (state.profilePicture) {
-    const pic = document.getElementById('profilePic');
-    pic.innerHTML = `<img src="${state.profilePicture}">`;
+    document.getElementById('profilePic').innerHTML = `<img src="${state.profilePicture}">`;
   }
-
-  if (state.isFirstLaunch) {
-    // Show welcome
-  } else {
-    startApp();
-  }
+  if (!state.isFirstLaunch) startApp();
 }
 
 async function startApp() {
@@ -1500,74 +699,45 @@ async function startApp() {
   document.getElementById('appContainer').style.display = 'flex';
   state.isFirstLaunch = false;
   saveState();
-  
-  // Auto-sync on open
-  if (state.autoSync && state.gistToken) {
-    syncData(true).catch(err => console.error('Auto-sync on open failed:', err));
-  }
-  
-  // Show homepage instead of auto-opening chat
+  if (state.autoSync && state.gistToken) syncData(true).catch(e => console.error(e));
   showHomepage();
 }
 
-// PWA SERVICE WORKER
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => self.clients.claim());
-      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swURL = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swURL);
+    const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>e.respondWith(fetch(e.request)));`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' })));
   }
 }
 
-// THEME
 function cycleTheme() {
-  const themes = ['dark', 'twilight', 'light'];
-  const current = themes.indexOf(state.theme);
-  state.theme = themes[(current + 1) % themes.length];
-  applyTheme();
-  saveState();
+  const themes = ['dark','twilight','light'];
+  state.theme = themes[(themes.indexOf(state.theme) + 1) % themes.length];
+  applyTheme(); saveState();
 }
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
-  const labels = { dark: '◐ Dark', twilight: '◑ Twilight', light: '◯ Light' };
-  document.getElementById('themeBtn').textContent = labels[state.theme];
+  document.getElementById('themeBtn').textContent = { dark: '◐ Dark', twilight: '◑ Twilight', light: '◯ Light' }[state.theme];
 }
 
-// PROJECTS
 function renderProjects() {
-  const bar = document.getElementById('projectBar');
-  bar.innerHTML = state.projects.map(p => `
-    <button class="project-tab ${p.id === state.activeProjectId ? 'active' : ''}" 
-            onclick="switchProject('${p.id}')" 
-            style="${p.id === state.activeProjectId ? `background: ${p.color}` : ''}">
-      ${p.name}
-    </button>
+  document.getElementById('projectBar').innerHTML = state.projects.map(p => `
+    <button class="project-tab ${p.id === state.activeProjectId ? 'active' : ''}"
+            onclick="switchProject('${p.id}')"
+            style="${p.id === state.activeProjectId ? `background:${p.color}` : ''}">${p.name}</button>
   `).join('');
 }
 
 function switchProject(id) {
   state.activeProjectId = id;
-  renderProjects();
-  renderChatList();
-  showHomepage();
-  saveState();
+  renderProjects(); renderChatList(); showHomepage(); saveState();
 }
 
-function openProjects() {
-  showToast('Project management - feature coming soon');
-}
+function openProjects() { showToast('Project management - feature coming soon'); }
 
-// PROFILE PICTURE
 function uploadProfilePic(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     state.profilePicture = e.target.result;
@@ -1577,71 +747,39 @@ function uploadProfilePic(event) {
   reader.readAsDataURL(file);
 }
 
-// HOMEPAGE
 function showHomepage() {
   document.getElementById('homepage').style.display = 'flex';
   document.getElementById('messagesContainer').style.display = 'none';
   document.getElementById('inputArea').style.display = 'none';
   document.getElementById('quickModelSwitch').innerHTML = '';
   state.activeChatId = null;
-  
   renderRecentChats();
   document.getElementById('homepageMemoryCount').textContent = state.memories.length;
   saveState();
 }
 
 function renderRecentChats() {
-  const projectChats = state.chats
-    .filter(c => c.projectId === state.activeProjectId)
-    .sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt))
-    .slice(0, 10);
-  
+  const chats = state.chats.filter(c => c.projectId === state.activeProjectId)
+    .sort((a,b) => (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt)).slice(0,10);
   const list = document.getElementById('recentChatsList');
-  
-  if (projectChats.length === 0) {
-    list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px;">No conversations yet. Start a new one!</p>';
-    return;
-  }
-  
-  list.innerHTML = projectChats.map(chat => {
-    const time = formatTimestamp(chat.updatedAt || chat.createdAt);
-    return `
-      <div class="chat-card" onclick="switchChat('${chat.id}')">
-        <div class="chat-card-title">${escapeHtml(chat.title)}</div>
-        <div class="chat-card-meta">${time} • ${chat.messages.length} messages</div>
-      </div>
-    `;
-  }).join('');
+  if (!chats.length) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">No conversations yet. Start a new one!</p>'; return; }
+  list.innerHTML = chats.map(c => `
+    <div class="chat-card" onclick="switchChat('${c.id}')">
+      <div class="chat-card-title">${escapeHtml(c.title)}</div>
+      <div class="chat-card-meta">${formatTimestamp(c.updatedAt||c.createdAt)} • ${c.messages.length} messages</div>
+    </div>`).join('');
 }
 
-function formatTimestamp(timestamp) {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const mins = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-  
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString();
+function formatTimestamp(ts) {
+  const d = Date.now() - ts, m = Math.floor(d/60000), h = Math.floor(d/3600000), dy = Math.floor(d/86400000);
+  if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`; if (dy < 7) return `${dy}d ago`;
+  return new Date(ts).toLocaleDateString();
 }
 
-// CHATS
 function createNewChat() {
-  const chat = {
-    id: Date.now().toString(),
-    title: 'New conversation',
-    projectId: state.activeProjectId,
-    model: state.model,
-    messages: [],
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  };
-  state.chats.unshift(chat);
-  switchChat(chat.id);
-  saveState();
+  const chat = { id: Date.now().toString(), title: 'New conversation', projectId: state.activeProjectId, model: state.model, messages: [], createdAt: Date.now(), updatedAt: Date.now() };
+  state.chats.unshift(chat); switchChat(chat.id); saveState();
 }
 
 function switchChat(id) {
@@ -1649,65 +787,39 @@ function switchChat(id) {
   document.getElementById('homepage').style.display = 'none';
   document.getElementById('messagesContainer').style.display = 'block';
   document.getElementById('inputArea').style.display = 'block';
-  renderChatList();
-  renderMessages();
-  updateQuickModelSwitch();
-  saveState();
+  renderChatList(); renderMessages(); updateQuickModelSwitch(); saveState();
 }
 
 function deleteChat(id, event) {
   event.stopPropagation();
-  
   if (!confirm('Delete this conversation?')) return;
-  
   state.chats = state.chats.filter(c => c.id !== id);
-  
-  if (state.activeChatId === id) {
-    showHomepage();
-  }
-  
-  renderChatList();
-  saveState();
-  showToast('Conversation deleted');
+  if (state.activeChatId === id) showHomepage();
+  renderChatList(); saveState(); showToast('Conversation deleted');
 }
 
-function getActiveChat() {
-  return state.chats.find(c => c.id === state.activeChatId);
-}
+function getActiveChat() { return state.chats.find(c => c.id === state.activeChatId); }
 
 function renderChatList() {
-  const projectChats = state.chats
-    .filter(c => c.projectId === state.activeProjectId)
-    .sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
-  
-  const list = document.getElementById('chatList');
-  list.innerHTML = projectChats.map(chat => {
-    const time = formatTimestamp(chat.updatedAt || chat.createdAt);
-    return `
-      <div class="chat-item ${chat.id === state.activeChatId ? 'active' : ''}" 
-           onclick="switchChat('${chat.id}')">
-        <div class="chat-item-title">
-          ${chat.forkedFrom ? '<span style="color: var(--text-muted); font-size: 11px; margin-right: 6px;">↳</span>' : ''}${escapeHtml(chat.title)}
-        </div>
-        <div class="chat-item-meta">${time}</div>
-        <button class="delete-chat-btn" onclick="deleteChat('${chat.id}', event)" title="Delete">×</button>
-      </div>
-    `;
-  }).join('');
+  const chats = state.chats.filter(c => c.projectId === state.activeProjectId)
+    .sort((a,b) => (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt));
+  document.getElementById('chatList').innerHTML = chats.map(c => `
+    <div class="chat-item ${c.id === state.activeChatId ? 'active' : ''}" onclick="switchChat('${c.id}')">
+      <div class="chat-item-title">${c.forkedFrom ? '<span style="color:var(--text-muted);font-size:11px;margin-right:6px;">↳</span>' : ''}${escapeHtml(c.title)}</div>
+      <div class="chat-item-meta">${formatTimestamp(c.updatedAt||c.createdAt)}</div>
+      <button class="delete-chat-btn" onclick="deleteChat('${c.id}',event)" title="Delete">×</button>
+    </div>`).join('');
 }
 
-// MESSAGES
 function renderMessages() {
-  const chat = getActiveChat();
-  if (!chat) return;
-  
+  const chat = getActiveChat(); if (!chat) return;
   const container = document.getElementById('messagesContainer');
   container.innerHTML = chat.messages.map((msg, idx) => `
     <div class="message ${msg.role}" data-index="${idx}">
       <div class="message-header">
         ${msg.role === 'user' ? 'Lexi' : 'Bloodink'}
-        ${msg.pinned ? '<span style="margin-left: 12px; color: var(--accent); font-size: 11px;">pinned</span>' : ''}
-        ${msg.activeMemories && msg.activeMemories.length > 0 ? `<span style="margin-left: 12px; color: var(--text-muted); font-size: 11px; cursor: pointer;" onclick="showMemoryInfo(${idx})" title="Active memories">${msg.activeMemories.length} memories</span>` : ''}
+        ${msg.pinned ? '<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>' : ''}
+        ${msg.activeMemories?.length ? `<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemoryInfo(${idx})">${msg.activeMemories.length} memories</span>` : ''}
       </div>
       <div class="message-content">${renderMarkdown(msg.content)}</div>
       ${msg.image ? `<img src="${msg.image}" class="message-image">` : ''}
@@ -1721,548 +833,232 @@ function renderMessages() {
           <button class="message-action-btn" onclick="editMessage(${idx})">Edit</button>
         ` : ''}
       </div>
-    </div>
-  `).join('');
-  
+    </div>`).join('');
   container.scrollTop = container.scrollHeight;
 }
 
 function editMessage(index) {
-  const chat = getActiveChat();
-  const msg = chat.messages[index];
-  
+  const chat = getActiveChat(), msg = chat.messages[index];
   const newContent = prompt('Edit your message:', msg.content);
   if (newContent && newContent.trim() && newContent !== msg.content) {
     chat.messages = chat.messages.slice(0, index);
     chat.messages.push({ role: 'user', content: newContent.trim() });
-    chat.updatedAt = Date.now();
-    renderMessages();
-    saveState();
-    sendMessage(true);
+    chat.updatedAt = Date.now(); renderMessages(); saveState(); sendMessage(true);
   }
 }
 
 function regenerateMessage(index) {
   const chat = getActiveChat();
   chat.messages = chat.messages.slice(0, index);
-  chat.updatedAt = Date.now();
-  renderMessages();
-  saveState();
-  sendMessage(true);
+  chat.updatedAt = Date.now(); renderMessages(); saveState(); sendMessage(true);
 }
 
 function copyMessage(index) {
-  const chat = getActiveChat();
-  const content = chat.messages[index].content;
-  navigator.clipboard.writeText(content);
+  navigator.clipboard.writeText(getActiveChat().messages[index].content);
   showToast('Copied to clipboard');
 }
 
 function togglePin(index) {
-  const chat = getActiveChat();
-  const msg = chat.messages[index];
-  msg.pinned = !msg.pinned;
-  renderMessages();
-  saveState();
+  const chat = getActiveChat(), msg = chat.messages[index];
+  msg.pinned = !msg.pinned; renderMessages(); saveState();
   showToast(msg.pinned ? 'Message pinned' : 'Message unpinned');
 }
 
 function forkConversation(messageIndex) {
-  const sourceChat = getActiveChat();
-  if (!sourceChat) return;
-  
-  const forkedChat = {
-    id: Date.now().toString(),
-    title: `${sourceChat.title} (fork)`,
-    projectId: sourceChat.projectId,
-    model: sourceChat.model,
-    messages: sourceChat.messages.slice(0, messageIndex + 1).map(msg => ({...msg})),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    forkedFrom: sourceChat.id,
-    forkedAt: messageIndex
-  };
-  
-  state.chats.unshift(forkedChat);
-  switchChat(forkedChat.id);
-  saveState();
-  showToast('Conversation forked');
+  const src = getActiveChat(); if (!src) return;
+  const fork = { id: Date.now().toString(), title: `${src.title} (fork)`, projectId: src.projectId, model: src.model, messages: src.messages.slice(0, messageIndex + 1).map(m => ({...m})), createdAt: Date.now(), updatedAt: Date.now(), forkedFrom: src.id, forkedAt: messageIndex };
+  state.chats.unshift(fork); switchChat(fork.id); saveState(); showToast('Conversation forked');
 }
 
 function showMemoryInfo(index) {
-  const chat = getActiveChat();
-  const msg = chat.messages[index];
-  if (!msg.activeMemories || msg.activeMemories.length === 0) {
-    showToast('No memories were active');
-    return;
-  }
-  
-  const memoryNames = msg.activeMemories.map(m => `• ${m}`).join('\n');
-  alert(`Active memories for this response:\n\n${memoryNames}`);
+  const msg = getActiveChat().messages[index];
+  if (!msg.activeMemories?.length) { showToast('No memories were active'); return; }
+  alert(`Active memories:\n\n${msg.activeMemories.map(m => `• ${m}`).join('\n')}`);
 }
 
 function renderMarkdown(text) {
   if (!text) return '';
-  
-  let html = escapeHtml(text);
-  
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
-  html = html.replace(/`(.+?)`/g, '<code style="background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
-  html = html.replace(/```([\s\S]+?)```/g, '<pre style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0;"><code>$1</code></pre>');
-  
-  return html;
+  let h = escapeHtml(text);
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  h = h.replace(/_(.+?)_/g, '<em>$1</em>');
+  h = h.replace(/`(.+?)`/g, '<code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.9em;">$1</code>');
+  h = h.replace(/```([\s\S]+?)```/g, '<pre style="background:var(--bg-tertiary);padding:12px;border-radius:8px;overflow-x:auto;margin:8px 0;"><code>$1</code></pre>');
+  return h;
 }
 
-// MEMORY SYSTEM
 function getRelevantMemories(userMessage) {
-  const normalize = text => text.toLowerCase().trim();
-  const msgNorm = normalize(userMessage);
-  
-  const pinned = [];
-  const matched = [];
-  
-  state.memories.forEach(mem => {
-    if (mem.pinned) {
-      pinned.push(mem);
-      return;
-    }
-    
-    const keywords = (mem.keywords || []).map(normalize);
-    if (keywords.some(kw => kw && msgNorm.includes(kw))) {
-      matched.push(mem);
-    }
+  const norm = t => t.toLowerCase().trim(), msg = norm(userMessage);
+  const pinned = [], matched = [];
+  state.memories.forEach(m => {
+    if (m.pinned) { pinned.push(m); return; }
+    if ((m.keywords||[]).map(norm).some(k => k && msg.includes(k))) matched.push(m);
   });
-  
-  const priorityOrder = { high: 0, medium: 1, low: 2 };
-  matched.sort((a, b) => (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1));
-  
-  const maxMem = state.maxMemories || 3;
-  const remaining = Math.max(0, maxMem - pinned.length);
-  
-  return [...pinned, ...matched.slice(0, remaining)];
+  matched.sort((a,b) => ({high:0,medium:1,low:2}[a.priority]||1) - ({high:0,medium:1,low:2}[b.priority]||1));
+  const max = state.maxMemories || 3;
+  return [...pinned, ...matched.slice(0, Math.max(0, max - pinned.length))];
 }
 
 function getSmartContext(messages, userMessage, relevantMemories) {
-  const normalize = text => text.toLowerCase().trim();
-  const msgNorm = normalize(userMessage);
-  
-  const characterNames = ['sephy', 'sephtis', 'rhia', 'therron', 'charlotte', 'khailani', 'ansaldo', 'kateri'];
-  const memoryKeywords = relevantMemories.flatMap(m => m.keywords || []).map(normalize);
-  
-  const scored = messages.map((msg, idx) => {
-    let score = 0;
-    const content = normalize(msg.content);
-    
-    if (msg.pinned) score += 1000;
-    
-    const recency = idx / messages.length;
-    score += recency * 50;
-    
-    memoryKeywords.forEach(kw => {
-      if (content.includes(kw)) score += 20;
-    });
-    
-    characterNames.forEach(name => {
-      if (content.includes(name) || msgNorm.includes(name)) score += 15;
-    });
-    
-    if (msg.role === 'system') score += 30;
-    
-    return { msg, idx, score };
+  const norm = t => t.toLowerCase().trim(), msg = norm(userMessage);
+  const chars = ['sephy','sephtis','rhia','therron','charlotte','khailani','ansaldo','kateri'];
+  const mkw = relevantMemories.flatMap(m => m.keywords||[]).map(norm);
+  const scored = messages.map((m, idx) => {
+    let s = 0, c = norm(m.content);
+    if (m.pinned) s += 1000;
+    s += (idx / messages.length) * 50;
+    mkw.forEach(k => { if (c.includes(k)) s += 20; });
+    chars.forEach(n => { if (c.includes(n) || msg.includes(n)) s += 15; });
+    if (m.role === 'system') s += 30;
+    return { m, s };
   });
-  
-  scored.sort((a, b) => b.score - a.score);
-  
-  const lastFour = messages.slice(-4);
-  const topMessages = scored.slice(0, 12).map(s => s.msg);
-  
-  const combined = [...new Set([...topMessages, ...lastFour])];
-  
-  return combined.sort((a, b) => messages.indexOf(a) - messages.indexOf(b));
+  scored.sort((a,b) => b.s - a.s);
+  const last4 = messages.slice(-4), top = scored.slice(0,12).map(x => x.m);
+  return [...new Set([...top, ...last4])].sort((a,b) => messages.indexOf(a) - messages.indexOf(b));
 }
 
 function createMemoryFromTool(params) {
-  const memory = {
-    id: Date.now().toString(),
-    name: params.name,
-    content: params.content,
-    keywords: params.keywords || [],
-    priority: params.priority || 'medium',
-    pinned: params.pinned || false,
-    createdAt: Date.now()
-  };
-  
-  state.memories.push(memory);
-  saveState();
-  updateMemoryCount();
-  
-  return {
-    success: true,
-    memory_id: memory.id,
-    message: `Memory "${memory.name}" created successfully.`
-  };
+  const memory = { id: Date.now().toString(), name: params.name, content: params.content, keywords: params.keywords||[], priority: params.priority||'medium', pinned: params.pinned||false, createdAt: Date.now() };
+  state.memories.push(memory); saveState(); updateMemoryCount();
+  return { success: true, memory_id: memory.id, message: `Memory "${memory.name}" created.` };
 }
 
 function updateMemoryCount() {
   document.getElementById('memoryCount').textContent = state.memories.length;
-  const homepageCount = document.getElementById('homepageMemoryCount');
-  if (homepageCount) homepageCount.textContent = state.memories.length;
+  const h = document.getElementById('homepageMemoryCount');
+  if (h) h.textContent = state.memories.length;
 }
 
-// BACKGROUND MEMORY ANALYSIS FOR NON-FUNCTION-CALLING MODELS
-async function analyzeForMemories(conversationHistory) {
+async function analyzeForMemories(history) {
   if (!state.apiKey) return;
-  
-  const lastMessages = conversationHistory.slice(-10);
-  
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-        'HTTP-Referer': window.location.origin
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'Analyze this conversation and determine if any memories should be created. If yes, use the create_memory tool. Focus on: character details, personal facts, creative principles, important preferences, or significant life events.'
-          },
-          ...lastMessages
-        ],
-        tools: [CREATE_MEMORY_TOOL],
-        temperature: 0.3
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}`, 'HTTP-Referer': window.location.origin },
+      body: JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'system', content: 'Analyze and create memories if needed.' }, ...history.slice(-10)], tools: [CREATE_MEMORY_TOOL], temperature: 0.3 })
     });
-    
-    if (!response.ok) return;
-    
-    const data = await response.json();
-    const choice = data.choices[0];
-    
-    if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
-      choice.message.tool_calls.forEach(toolCall => {
-        if (toolCall.function.name === 'create_memory') {
-          const params = JSON.parse(toolCall.function.arguments);
-          createMemoryFromTool(params);
-          console.log('Background memory created:', params.name);
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Background memory analysis failed:', error);
-  }
+    if (!r.ok) return;
+    const d = await r.json();
+    (d.choices[0].message.tool_calls||[]).forEach(tc => {
+      if (tc.function.name === 'create_memory') createMemoryFromTool(JSON.parse(tc.function.arguments));
+    });
+  } catch(e) { console.error('Background memory failed:', e); }
 }
 
-// IMAGE/DOCUMENT UPLOAD
 function attachImage(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     const input = document.getElementById('inputField');
-    input.value += '\n[Image attached]';
-    input.dataset.image = e.target.result;
+    input.value += '\n[Image attached]'; input.dataset.image = e.target.result;
     input.dispatchEvent(new Event('input'));
   };
   reader.readAsDataURL(file);
 }
 
 function attachDocument(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     const input = document.getElementById('inputField');
-    input.value += `\n[Document: ${file.name}]`;
-    input.dataset.document = e.target.result;
-    input.dataset.documentName = file.name;
+    input.value += `\n[Document: ${file.name}]`; input.dataset.document = e.target.result; input.dataset.documentName = file.name;
     input.dispatchEvent(new Event('input'));
   };
   reader.readAsText(file);
 }
 
-// VOICE INPUT
 async function toggleVoice() {
-  const btn = document.getElementById('micButton');
-  
-  if (btn.classList.contains('recording')) {
-    stopVoice();
-  } else {
-    startVoice();
-  }
+  document.getElementById('micButton').classList.contains('recording') ? stopVoice() : startVoice();
 }
 
 function startVoice() {
-  const btn = document.getElementById('micButton');
-  const recording = document.getElementById('voiceRecording');
-  
-  btn.classList.add('recording');
-  recording.classList.add('active');
-  
-  if (state.groqKey) {
-    startGroqRecording();
-  } else {
-    startBrowserRecognition();
-  }
+  document.getElementById('micButton').classList.add('recording');
+  document.getElementById('voiceRecording').classList.add('active');
+  state.groqKey ? startGroqRecording() : startBrowserRecognition();
 }
 
 function stopVoice() {
-  const btn = document.getElementById('micButton');
-  const recording = document.getElementById('voiceRecording');
-  
-  btn.classList.remove('recording');
-  recording.classList.remove('active');
-  
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    mediaRecorder.stop();
-  }
-  
-  if (recognition) {
-    recognition.stop();
-  }
+  document.getElementById('micButton').classList.remove('recording');
+  document.getElementById('voiceRecording').classList.remove('active');
+  if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
+  if (recognition) recognition.stop();
 }
 
 async function startGroqRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-    
-    mediaRecorder.ondataavailable = (e) => {
-      audioChunks.push(e.data);
-    };
-    
-    mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      await transcribeWithGroq(audioBlob);
-      stream.getTracks().forEach(track => track.stop());
-    };
-    
+    mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => { await transcribeWithGroq(new Blob(audioChunks, { type: 'audio/webm' })); stream.getTracks().forEach(t => t.stop()); };
     mediaRecorder.start();
-  } catch (error) {
-    showToast('Microphone access denied');
-    stopVoice();
-  }
+  } catch(e) { showToast('Microphone access denied'); stopVoice(); }
 }
 
-async function transcribeWithGroq(audioBlob) {
-  const formData = new FormData();
-  formData.append('file', audioBlob, 'audio.webm');
-  formData.append('model', 'whisper-large-v3');
-  
+async function transcribeWithGroq(blob) {
+  const fd = new FormData(); fd.append('file', blob, 'audio.webm'); fd.append('model', 'whisper-large-v3');
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${state.groqKey}`
-      },
-      body: formData
-    });
-    
-    const data = await response.json();
-    if (data.text) {
-      document.getElementById('inputField').value = data.text;
-      document.getElementById('inputField').dispatchEvent(new Event('input'));
-    }
-  } catch (error) {
-    showToast('Transcription failed');
-  }
+    const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { 'Authorization': `Bearer ${state.groqKey}` }, body: fd });
+    const d = await r.json();
+    if (d.text) { document.getElementById('inputField').value = d.text; document.getElementById('inputField').dispatchEvent(new Event('input')); }
+  } catch(e) { showToast('Transcription failed'); }
 }
 
 function startBrowserRecognition() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Voice input not supported');
-    stopVoice();
-    return;
-  }
-  
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById('inputField').value = transcript;
-    document.getElementById('inputField').dispatchEvent(new Event('input'));
-  };
-  
-  recognition.onerror = () => {
-    showToast('Voice input error');
-    stopVoice();
-  };
-  
-  recognition.onend = stopVoice;
-  
-  recognition.start();
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { showToast('Voice input not supported'); stopVoice(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR(); recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = e => { document.getElementById('inputField').value = e.results[0][0].transcript; document.getElementById('inputField').dispatchEvent(new Event('input')); };
+  recognition.onerror = () => { showToast('Voice input error'); stopVoice(); };
+  recognition.onend = stopVoice; recognition.start();
 }
 
-// SEND MESSAGE
 async function sendMessage(isRegenerate = false) {
-  const input = document.getElementById('inputField');
-  const content = input.value.trim();
+  const input = document.getElementById('inputField'), content = input.value.trim();
   if (!content && !isRegenerate) return;
-  
   const chat = getActiveChat();
-  if (!chat) {
-    createNewChat();
-    return sendMessage(isRegenerate);
-  }
-  
-  if (!state.apiKey) {
-    showToast('Please add your API key in settings');
-    openSettings();
-    return;
-  }
-  
+  if (!chat) { createNewChat(); return sendMessage(isRegenerate); }
+  if (!state.apiKey) { showToast('Please add your API key in settings'); openSettings(); return; }
   if (!isRegenerate) {
     const userMsg = { role: 'user', content };
-    if (input.dataset.image) {
-      userMsg.image = input.dataset.image;
-      delete input.dataset.image;
-    }
+    if (input.dataset.image) { userMsg.image = input.dataset.image; delete input.dataset.image; }
     chat.messages.push(userMsg);
   }
-  
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
   document.getElementById('sendButton').disabled = true;
-  chat.updatedAt = Date.now();
-  renderMessages();
-  saveState();
-  
-  showToast('Sending...');
-  
-  const relevantMemories = getRelevantMemories(content);
-  const currentModel = MODELS.find(m => m.id === chat.model);
-  const modelHasFunctionCalling = currentModel?.hasFunctionCalling || false;
-  
-  const messages = [
-    { role: 'system', content: state.systemPrompt }
-  ];
-  
-  if (relevantMemories.length > 0) {
-    const memoryBlock = relevantMemories.map(m => `## ${m.name}\n${m.content}`).join('\n\n---\n\n');
-    messages.push({ role: 'system', content: `[MEMORIES]\n\n${memoryBlock}` });
-  }
-  
-  const smartContext = getSmartContext(chat.messages, content, relevantMemories);
-  messages.push(...smartContext);
-  
+  chat.updatedAt = Date.now(); renderMessages(); saveState(); showToast('Sending...');
+  const mems = getRelevantMemories(content);
+  const model = MODELS.find(m => m.id === chat.model);
+  const hasFn = model?.hasFunctionCalling || false;
+  const messages = [{ role: 'system', content: state.systemPrompt }];
+  if (mems.length) messages.push({ role: 'system', content: `[MEMORIES]\n\n${mems.map(m => `## ${m.name}\n${m.content}`).join('\n\n---\n\n')}` });
+  messages.push(...getSmartContext(chat.messages, content, mems));
   try {
-    const requestBody = {
-      model: chat.model,
-      messages,
-      temperature: state.temperature,
-      repetition_penalty: state.repetitionPenalty
-    };
-    
-    if (modelHasFunctionCalling) {
-      requestBody.tools = [CREATE_MEMORY_TOOL];
-    }
-    
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Bloodink'
-      },
-      body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('Invalid API response');
-    }
-    
+    const body = { model: chat.model, messages, temperature: state.temperature, repetition_penalty: state.repetitionPenalty };
+    if (hasFn) body.tools = [CREATE_MEMORY_TOOL];
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}`, 'HTTP-Referer': window.location.origin, 'X-Title': 'Bloodink' }, body: JSON.stringify(body) });
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error?.message || `API error: ${r.status}`); }
+    const data = await r.json();
+    if (!data.choices?.[0]) throw new Error('Invalid API response');
     const choice = data.choices[0];
-    
-    if (modelHasFunctionCalling && choice.message.tool_calls && choice.message.tool_calls.length > 0) {
-      const toolCall = choice.message.tool_calls[0];
-      
-      if (toolCall.function.name === 'create_memory') {
-        const params = JSON.parse(toolCall.function.arguments);
-        const result = createMemoryFromTool(params);
-        
+    if (hasFn && choice.message.tool_calls?.length) {
+      const tc = choice.message.tool_calls[0];
+      if (tc.function.name === 'create_memory') {
+        const params = JSON.parse(tc.function.arguments), result = createMemoryFromTool(params);
         messages.push(choice.message);
-        messages.push({
-          role: 'tool',
-          tool_call_id: toolCall.id,
-          content: JSON.stringify(result)
-        });
-        
-        const response2 = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.apiKey}`,
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Bloodink'
-          },
-          body: JSON.stringify({
-            model: chat.model,
-            messages,
-            temperature: state.temperature,
-            repetition_penalty: state.repetitionPenalty
-          })
-        });
-        
-        const data2 = await response2.json();
-        const assistantMessage = data2.choices[0].message.content;
-        
-        chat.messages.push({ 
-          role: 'assistant', 
-          content: assistantMessage,
-          activeMemories: relevantMemories.map(m => m.name)
-        });
-        chat.updatedAt = Date.now();
-        renderMessages();
-        saveState();
-        showToast(`Memory saved: ${params.name}`);
+        messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+        const r2 = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}`, 'HTTP-Referer': window.location.origin, 'X-Title': 'Bloodink' }, body: JSON.stringify({ model: chat.model, messages, temperature: state.temperature, repetition_penalty: state.repetitionPenalty }) });
+        const d2 = await r2.json();
+        chat.messages.push({ role: 'assistant', content: d2.choices[0].message.content, activeMemories: mems.map(m => m.name) });
+        chat.updatedAt = Date.now(); renderMessages(); saveState(); showToast(`Memory saved: ${params.name}`);
       }
     } else {
-      const assistantMessage = choice.message.content;
-      
-      chat.messages.push({ 
-        role: 'assistant', 
-        content: assistantMessage,
-        activeMemories: relevantMemories.map(m => m.name)
-      });
-      chat.updatedAt = Date.now();
-      renderMessages();
-      saveState();
-      
-      // Background memory analysis for models without function calling
-      if (!modelHasFunctionCalling) {
-        analyzeForMemories(chat.messages).catch(err => console.error('Background memory failed:', err));
-      }
+      chat.messages.push({ role: 'assistant', content: choice.message.content, activeMemories: mems.map(m => m.name) });
+      chat.updatedAt = Date.now(); renderMessages(); saveState();
+      if (!hasFn) analyzeForMemories(chat.messages).catch(e => console.error(e));
     }
-    
-    // Auto-sync after message - CRITICAL FIX
-    if (state.autoSync && state.gistToken) {
-      syncData(true).catch(err => console.error('Auto-sync after message failed:', err));
-    }
-    
-    if (chat.messages.filter(m => m.role === 'user').length === 1 && chat.title === 'New conversation') {
-      setTimeout(() => autoNameChat(chat), 1000);
-    }
-    
-  } catch (error) {
+    if (state.autoSync && state.gistToken) syncData(true).catch(e => console.error(e));
+    if (chat.messages.filter(m => m.role === 'user').length === 1 && chat.title === 'New conversation') setTimeout(() => autoNameChat(chat), 1000);
+  } catch(error) {
     showToast('Error: ' + error.message);
     if (!isRegenerate) chat.messages.pop();
     renderMessages();
@@ -2271,48 +1067,21 @@ async function sendMessage(isRegenerate = false) {
 
 async function autoNameChat(chat) {
   try {
-    const userMsgs = chat.messages.filter(m => m.role === 'user');
-    const assistantMsgs = chat.messages.filter(m => m.role === 'assistant');
-    
-    if (userMsgs.length === 0 || assistantMsgs.length === 0) return;
-    
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-        'HTTP-Referer': window.location.origin
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
-        messages: [
-          { role: 'user', content: `Generate a 3-5 word title:\n\nUser: ${userMsgs[0].content}\n\nAssistant: ${assistantMsgs[0].content}\n\nTitle:` }
-        ],
-        temperature: 0.7,
-        max_tokens: 20
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      const title = data.choices[0].message.content.trim().replace(/['"]/g, '').substring(0, 50);
-      if (title && title.length > 3) {
-        chat.title = title;
-        chat.updatedAt = Date.now();
-        renderChatList();
-        saveState();
-      }
+    const u = chat.messages.filter(m => m.role === 'user'), a = chat.messages.filter(m => m.role === 'assistant');
+    if (!u.length || !a.length) return;
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}`, 'HTTP-Referer': window.location.origin }, body: JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: `Generate a 3-5 word title:\n\nUser: ${u[0].content}\n\nAssistant: ${a[0].content}\n\nTitle:` }], temperature: 0.7, max_tokens: 20 }) });
+    if (r.ok) {
+      const d = await r.json(), title = d.choices[0].message.content.trim().replace(/['"]/g,'').substring(0,50);
+      if (title && title.length > 3) { chat.title = title; chat.updatedAt = Date.now(); renderChatList(); saveState(); }
     }
-  } catch (error) {
-    console.error('Auto-naming failed:', error);
-  }
+  } catch(e) { console.error('Auto-naming failed:', e); }
 }
 
-// SETTINGS
 function openSettings() {
   document.getElementById('apiKeyInput').value = state.apiKey;
   document.getElementById('groqKeyInput').value = state.groqKey;
   document.getElementById('gistTokenInput').value = state.gistToken;
+  document.getElementById('gistIdInput').value = state.gistId || '';
   document.getElementById('systemPromptInput').value = state.systemPrompt;
   document.getElementById('modelSelect').value = state.model;
   document.getElementById('temperatureInput').value = state.temperature;
@@ -2322,212 +1091,116 @@ function openSettings() {
   document.getElementById('settingsModal').classList.add('visible');
 }
 
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('visible');
-}
+function closeSettings() { document.getElementById('settingsModal').classList.remove('visible'); }
 
 function saveSettings() {
   state.apiKey = document.getElementById('apiKeyInput').value.trim();
   state.groqKey = document.getElementById('groqKeyInput').value.trim();
   state.gistToken = document.getElementById('gistTokenInput').value.trim();
+  state.gistId = document.getElementById('gistIdInput').value.trim();
   state.systemPrompt = document.getElementById('systemPromptInput').value.trim();
   state.model = document.getElementById('modelSelect').value;
   state.temperature = parseFloat(document.getElementById('temperatureInput').value);
   state.repetitionPenalty = parseFloat(document.getElementById('repetitionInput').value);
-  
-  const chat = getActiveChat();
-  if (chat) chat.model = state.model;
-  
-  saveState();
-  closeSettings();
-  showToast('Settings saved');
-  updateQuickModelSwitch();
+  const chat = getActiveChat(); if (chat) chat.model = state.model;
+  saveState(); closeSettings(); showToast('Settings saved'); updateQuickModelSwitch();
 }
 
 function populateModelSelect() {
-  const select = document.getElementById('modelSelect');
   const grouped = {};
-  
-  MODELS.forEach(m => {
-    if (!grouped[m.provider]) grouped[m.provider] = [];
-    grouped[m.provider].push(m);
-  });
-  
-  select.innerHTML = Object.entries(grouped).map(([provider, models]) => `
-    <optgroup label="${provider}">
-      ${models.map(m => `<option value="${m.id}" ${!m.hasFunctionCalling ? 'style="color: #c7a853;"' : ''}>${m.name}${!m.hasFunctionCalling ? ' ⚠' : ''}</option>`).join('')}
-    </optgroup>
-  `).join('');
+  MODELS.forEach(m => { if (!grouped[m.provider]) grouped[m.provider] = []; grouped[m.provider].push(m); });
+  document.getElementById('modelSelect').innerHTML = Object.entries(grouped).map(([p, ms]) => `
+    <optgroup label="${p}">${ms.map(m => `<option value="${m.id}" ${!m.hasFunctionCalling ? 'style="color:#c7a853;"' : ''}>${m.name}${!m.hasFunctionCalling ? ' ⚠' : ''}</option>`).join('')}</optgroup>`).join('');
 }
 
-// EXPORT/IMPORT
 function exportData() {
-  const data = {
-    version: 4,
-    exported: new Date().toISOString(),
-    chats: state.chats,
-    memories: state.memories,
-    projects: state.projects
-  };
-  
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `bloodink-export-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  showToast('Data exported');
+  const data = { version: 4, exported: new Date().toISOString(), chats: state.chats, memories: state.memories, projects: state.projects };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+  a.download = `bloodink-export-${Date.now()}.json`; a.click(); showToast('Data exported');
 }
 
 function importConversation() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = ev => {
       try {
-        const data = JSON.parse(event.target.result);
-        
+        const data = JSON.parse(ev.target.result);
         if (data.version && data.chats) {
-          // Full export
-          data.chats.forEach(chat => {
-            chat.id = Date.now().toString() + Math.random();
-            chat.title = chat.title + ' (imported)';
-            state.chats.unshift(chat);
-          });
+          data.chats.forEach(c => { c.id = Date.now().toString()+Math.random(); c.title += ' (imported)'; state.chats.unshift(c); });
           showToast(`Imported ${data.chats.length} conversations`);
         } else if (data.messages) {
-          // Single conversation
-          data.id = Date.now().toString();
-          data.title = (data.title || 'Imported conversation');
-          data.createdAt = Date.now();
-          data.updatedAt = Date.now();
-          state.chats.unshift(data);
-          showToast('Conversation imported');
+          data.id = Date.now().toString(); data.title = data.title||'Imported conversation'; data.createdAt = data.updatedAt = Date.now(); state.chats.unshift(data); showToast('Conversation imported');
         }
-        
-        saveState();
-        renderChatList();
-        showHomepage();
-      } catch (error) {
-        showToast('Invalid file format');
-      }
+        saveState(); renderChatList(); showHomepage();
+      } catch(e) { showToast('Invalid file format'); }
     };
-    reader.readAsText(file);
+    reader.readAsText(e.target.files[0]);
   };
-  
   input.click();
 }
 
-// SIDEBAR
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarOverlay').classList.toggle('visible');
 }
 
-// PERSISTENCE
-function saveState() {
-  localStorage.setItem('bloodink_v4', JSON.stringify(state));
-}
+function saveState() { localStorage.setItem('bloodink_v4', JSON.stringify(state)); }
 
 function loadState() {
   const saved = localStorage.getItem('bloodink_v4');
   if (saved) {
-    state = { ...state, ...JSON.parse(saved) };
+    try { state = { ...state, ...JSON.parse(saved) }; }
+    catch(e) { console.error('Corrupted state, resetting'); localStorage.removeItem('bloodink_v4'); }
   }
 }
 
-// SYNC STATUS
 function updateSyncStatus() {
-  const status = document.getElementById('syncStatus');
-  if (!state.lastSyncTime) {
-    status.textContent = 'Not synced';
-    return;
-  }
-  
-  const diff = Date.now() - state.lastSyncTime;
-  const mins = Math.floor(diff / 60000);
-  
-  if (mins < 1) status.textContent = 'Synced just now';
-  else if (mins < 60) status.textContent = `Synced ${mins}m ago`;
-  else status.textContent = 'Synced';
-  
-  setTimeout(updateSyncStatus, 30000); // Update every 30s
+  const el = document.getElementById('syncStatus');
+  if (!state.lastSyncTime) { el.textContent = 'Not synced'; return; }
+  const m = Math.floor((Date.now() - state.lastSyncTime) / 60000);
+  el.textContent = m < 1 ? 'Synced just now' : m < 60 ? `Synced ${m}m ago` : 'Synced';
+  setTimeout(updateSyncStatus, 30000);
 }
 
-// UTILS
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
 }
 
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 3000);
-}
-
-// MEMORIES MODAL
 let currentMemoryId = null;
 
 function openMemories() {
-  renderMemoryList();
-  document.getElementById('memoriesModal').classList.add('visible');
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar.classList.contains('open')) toggleSidebar();
+  renderMemoryList(); document.getElementById('memoriesModal').classList.add('visible');
+  if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
 }
 
-function closeMemories() {
-  document.getElementById('memoriesModal').classList.remove('visible');
-}
+function closeMemories() { document.getElementById('memoriesModal').classList.remove('visible'); }
 
 function renderMemoryList() {
   const list = document.getElementById('memoryList');
-  if (state.memories.length === 0) {
-    list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No memories yet. Bloodink will create them automatically as you share important information.</p>';
-    return;
-  }
-  
-  list.innerHTML = state.memories.map(mem => `
+  if (!state.memories.length) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No memories yet. Bloodink will create them automatically.</p>'; return; }
+  list.innerHTML = state.memories.map(m => `
     <div class="memory-item">
-      <div class="memory-item-name">${escapeHtml(mem.name)}</div>
-      <div class="memory-item-meta">
-        <span class="priority-${mem.priority}">${mem.priority}</span>
-        ${mem.pinned ? ' • 📌 Pinned' : ''}
-      </div>
-      ${mem.keywords && mem.keywords.length > 0 ? `
-        <div style="margin: 8px 0;">
-          ${mem.keywords.map(kw => `<span class="keyword-badge">${escapeHtml(kw)}</span>`).join('')}
-        </div>
-      ` : ''}
-      <div style="margin-top: 8px;">
-        <button class="btn-small" onclick="openMemoryEditor('${mem.id}')">Edit</button>
-      </div>
-    </div>
-  `).join('');
+      <div class="memory-item-name">${escapeHtml(m.name)}</div>
+      <div class="memory-item-meta"><span class="priority-${m.priority}">${m.priority}</span>${m.pinned ? ' • 📌 Pinned' : ''}</div>
+      ${m.keywords?.length ? `<div style="margin:8px 0;">${m.keywords.map(k => `<span class="keyword-badge">${escapeHtml(k)}</span>`).join('')}</div>` : ''}
+      <button class="btn-small" onclick="openMemoryEditor('${m.id}')">Edit</button>
+    </div>`).join('');
 }
 
 function openMemoryEditor(id) {
   currentMemoryId = id;
-  const memory = id ? state.memories.find(m => m.id === id) : null;
-  
+  const m = id ? state.memories.find(x => x.id === id) : null;
   document.getElementById('memoryEditorTitle').textContent = id ? 'Edit Memory' : 'Create Memory';
-  document.getElementById('memoryNameInput').value = memory?.name || '';
-  document.getElementById('memoryContentInput').value = memory?.content || '';
-  document.getElementById('memoryKeywordsInput').value = memory?.keywords?.join(', ') || '';
-  document.getElementById('memoryPriorityInput').value = memory?.priority || 'medium';
-  document.getElementById('memoryPinnedInput').checked = memory?.pinned || false;
+  document.getElementById('memoryNameInput').value = m?.name || '';
+  document.getElementById('memoryContentInput').value = m?.content || '';
+  document.getElementById('memoryKeywordsInput').value = m?.keywords?.join(', ') || '';
+  document.getElementById('memoryPriorityInput').value = m?.priority || 'medium';
+  document.getElementById('memoryPinnedInput').checked = m?.pinned || false;
   document.getElementById('deleteMemoryBtn').style.display = id ? 'block' : 'none';
-  
   document.getElementById('memoriesModal').classList.remove('visible');
   document.getElementById('memoryEditorModal').classList.add('visible');
 }
@@ -2538,414 +1211,151 @@ function closeMemoryEditor() {
 }
 
 function saveMemory() {
-  const name = document.getElementById('memoryNameInput').value.trim();
-  const content = document.getElementById('memoryContentInput').value.trim();
-  const keywordsRaw = document.getElementById('memoryKeywordsInput').value;
-  const priority = document.getElementById('memoryPriorityInput').value;
-  const pinned = document.getElementById('memoryPinnedInput').checked;
-  
-  if (!name || !content) {
-    showToast('Name and content are required');
-    return;
-  }
-  
-  const keywords = keywordsRaw.split(',').map(k => k.trim()).filter(k => k);
-  
+  const name = document.getElementById('memoryNameInput').value.trim(), content = document.getElementById('memoryContentInput').value.trim();
+  if (!name || !content) { showToast('Name and content are required'); return; }
+  const keywords = document.getElementById('memoryKeywordsInput').value.split(',').map(k => k.trim()).filter(k => k);
+  const priority = document.getElementById('memoryPriorityInput').value, pinned = document.getElementById('memoryPinnedInput').checked;
   if (currentMemoryId) {
-    const memory = state.memories.find(m => m.id === currentMemoryId);
-    if (memory) {
-      memory.name = name;
-      memory.content = content;
-      memory.keywords = keywords;
-      memory.priority = priority;
-      memory.pinned = pinned;
-    }
+    const m = state.memories.find(x => x.id === currentMemoryId);
+    if (m) Object.assign(m, { name, content, keywords, priority, pinned });
   } else {
-    state.memories.push({
-      id: Date.now().toString(),
-      name,
-      content,
-      keywords,
-      priority,
-      pinned,
-      createdAt: Date.now()
-    });
+    state.memories.push({ id: Date.now().toString(), name, content, keywords, priority, pinned, createdAt: Date.now() });
   }
-  
-  saveState();
-  updateMemoryCount();
-  closeMemoryEditor();
-  renderMemoryList();
-  showToast('Memory saved');
+  saveState(); updateMemoryCount(); closeMemoryEditor(); renderMemoryList(); showToast('Memory saved');
 }
 
 function deleteMemory() {
   if (!confirm('Delete this memory?')) return;
-  
   state.memories = state.memories.filter(m => m.id !== currentMemoryId);
-  saveState();
-  updateMemoryCount();
-  closeMemoryEditor();
-  renderMemoryList();
-  showToast('Memory deleted');
+  saveState(); updateMemoryCount(); closeMemoryEditor(); renderMemoryList(); showToast('Memory deleted');
 }
 
-// PROJECTS
 function createProject() {
-  const name = prompt('Project name:');
-  if (!name || !name.trim()) return;
-  
-  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3', '#ff9ff3'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  
-  const project = {
-    id: Date.now().toString(),
-    name: name.trim(),
-    color
-  };
-  
-  state.projects.push(project);
-  saveState();
-  renderProjects();
-  showToast('Project created');
+  const name = prompt('Project name:'); if (!name?.trim()) return;
+  const colors = ['#ff6b6b','#4ecdc4','#45b7d1','#f7b731','#5f27cd','#00d2d3','#ff9ff3'];
+  state.projects.push({ id: Date.now().toString(), name: name.trim(), color: colors[Math.floor(Math.random()*colors.length)] });
+  saveState(); renderProjects(); showToast('Project created');
 }
 
-function closeProjects() {
-  document.getElementById('projectsModal').classList.remove('visible');
-}
+function closeProjects() { document.getElementById('projectsModal').classList.remove('visible'); }
 
-// GITHUB GIST SYNC WITH MERGE - FIXED VERSION
 async function syncData(silent = false) {
-  if (!state.gistToken) {
-    if (!silent) {
-      showToast('Add GitHub token in settings first');
-      openSettings();
-    }
-    return;
-  }
-  
-  if (syncInProgress) {
-    console.log('Sync already in progress, skipping');
-    return;
-  }
-  
+  if (!state.gistToken) { if (!silent) { showToast('Add GitHub token in settings first'); openSettings(); } return; }
+  if (syncInProgress) { console.log('Sync already in progress'); return; }
   syncInProgress = true;
-  
-  // Timeout failsafe - if sync takes more than 30 seconds, force reset
-  const timeoutId = setTimeout(() => {
-    console.error('Sync timeout - force resetting syncInProgress');
-    syncInProgress = false;
-  }, 30000);
-  
-  console.log('=== SYNC STARTED ===');
-  console.log('Local gistId:', state.gistId);
-  console.log('Local chats count:', state.chats.length);
-  
+  const tid = setTimeout(() => { syncInProgress = false; }, 30000);
   if (!silent) showToast('Syncing...');
-  
   try {
-    // Step 1: Download existing cloud data
-    let cloudChats = [];
-    let cloudMemories = [];
-    let cloudProjects = DEFAULT_PROJECTS;
-    
+    let cloudChats = [], cloudMemories = [], cloudProjects = DEFAULT_PROJECTS;
+
+    // Step 1: Download
     if (state.gistId) {
-      console.log('Using existing gistId:', state.gistId);
-      const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
-        headers: { 'Authorization': `token ${state.gistToken}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.files['bloodink-sync.json'].content;
-        const cloudData = JSON.parse(content);
-        cloudChats = cloudData.chats || [];
-        cloudMemories = cloudData.memories || [];
-        cloudProjects = cloudData.projects || DEFAULT_PROJECTS;
-        console.log('Downloaded cloud chats:', cloudChats.length);
-      } else {
-        console.error('Failed to fetch gist:', response.status);
-      }
-    } else {
-      console.log('No gistId - searching for existing gist...');
-      const searchResponse = await fetch('https://api.github.com/gists', {
-        headers: { 'Authorization': `token ${state.gistToken}` }
-      });
-      
-      if (searchResponse.ok) {
-        const gists = await searchResponse.json();
-        const bloodinkGist = gists.find(g => 
-          g.description === 'Bloodink conversation sync' || 
-          g.files['bloodink-sync.json']
-        );
-        
-        if (bloodinkGist) {
-          console.log('Found existing gist:', bloodinkGist.id);
-          state.gistId = bloodinkGist.id;
-          saveState();
-          console.log('Saved gistId to localStorage');
-          
-          const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
-            headers: { 'Authorization': `token ${state.gistToken}` }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            const content = data.files['bloodink-sync.json'].content;
-            const cloudData = JSON.parse(content);
-            cloudChats = cloudData.chats || [];
-            cloudMemories = cloudData.memories || [];
-            cloudProjects = cloudData.projects || DEFAULT_PROJECTS;
-            console.log('Downloaded cloud chats:', cloudChats.length);
-          }
-        } else {
-          console.log('No existing gist found - will create new one');
+      const r = await fetch(`https://api.github.com/gists/${state.gistId}`, { headers: { 'Authorization': `token ${state.gistToken}` } });
+      if (r.ok) {
+        const d = await r.json(), content = d.files['bloodink-sync.json']?.content;
+        if (content) { const cd = JSON.parse(content); cloudChats = cd.chats||[]; cloudMemories = cd.memories||[]; cloudProjects = cd.projects||DEFAULT_PROJECTS; }
+      } else if (r.status === 404) { state.gistId = ''; saveState(); }
+    }
+
+    if (!state.gistId) {
+      const r = await fetch('https://api.github.com/gists', { headers: { 'Authorization': `token ${state.gistToken}` } });
+      if (r.ok) {
+        const gists = await r.json(), found = gists.find(g => g.description === 'Bloodink conversation sync' || g.files['bloodink-sync.json']);
+        if (found) {
+          state.gistId = found.id; saveState();
+          const r2 = await fetch(`https://api.github.com/gists/${state.gistId}`, { headers: { 'Authorization': `token ${state.gistToken}` } });
+          if (r2.ok) { const d = await r2.json(), c = d.files['bloodink-sync.json']?.content; if (c) { const cd = JSON.parse(c); cloudChats = cd.chats||[]; cloudMemories = cd.memories||[]; cloudProjects = cd.projects||DEFAULT_PROJECTS; } }
         }
       }
     }
-    
-    // Step 2: Merge local and cloud data
-    console.log('=== MERGING ===');
-    console.log('Local chats before merge:', state.chats.length);
-    console.log('Cloud chats before merge:', cloudChats.length);
-    
-    const mergedChats = [...state.chats];
-    let newChatsAdded = 0;
-    let chatsUpdated = 0;
-    
-    cloudChats.forEach(cloudChat => {
-      const localIndex = mergedChats.findIndex(c => c.id === cloudChat.id);
-      if (localIndex === -1) {
-        mergedChats.push(cloudChat);
-        newChatsAdded++;
-        console.log('Added new chat from cloud:', cloudChat.title);
-      } else {
-        if (cloudChat.messages.length > mergedChats[localIndex].messages.length) {
-          mergedChats[localIndex] = cloudChat;
-          chatsUpdated++;
-          console.log('Updated chat (cloud had more messages):', cloudChat.title);
-        }
+
+    // Step 2: Merge — timestamp wins
+    const merged = [...state.chats];
+    let added = 0, updated = 0;
+    cloudChats.forEach(cc => {
+      const li = merged.findIndex(c => c.id === cc.id);
+      if (li === -1) { merged.push(cc); added++; }
+      else {
+        const lc = merged[li];
+        if ((cc.updatedAt||0) > (lc.updatedAt||0) || cc.messages.length > lc.messages.length) { merged[li] = cc; updated++; }
       }
     });
-    
-    console.log('New chats added:', newChatsAdded);
-    console.log('Chats updated:', chatsUpdated);
-    console.log('Total chats after merge:', mergedChats.length);
-    
-    const mergedMemories = [...state.memories];
-    cloudMemories.forEach(cloudMem => {
-      const localIndex = mergedMemories.findIndex(m => m.id === cloudMem.id);
-      if (localIndex === -1) {
-        mergedMemories.push(cloudMem);
-      }
-    });
-    
-    // Step 3: Update local state
-    state.chats = mergedChats;
-    state.memories = mergedMemories;
-    state.projects = cloudProjects;
-    state.lastSyncTime = Date.now();
-    saveState();
-    console.log('Saved merged state to localStorage');
-    
-    // Step 4: Upload merged data
-    const syncDataObj = {
-      version: 4,
-      synced: new Date().toISOString(),
-      chats: mergedChats,
-      memories: mergedMemories,
-      projects: cloudProjects
-    };
-    
+    const mergedMems = [...state.memories];
+    cloudMemories.forEach(cm => { if (!mergedMems.find(m => m.id === cm.id)) mergedMems.push(cm); });
+
+    // Step 3: Update local
+    state.chats = merged; state.memories = mergedMems; state.projects = cloudProjects;
+    state.lastSyncTime = Date.now(); saveState();
+
+    // Step 4: Upload
+    const payload = { version: 4, synced: new Date().toISOString(), chats: merged, memories: mergedMems, projects: cloudProjects };
     if (state.gistId) {
-      console.log('Updating existing gist:', state.gistId);
-      const response = await fetch(`https://api.github.com/gists/${state.gistId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `token ${state.gistToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          files: {
-            'bloodink-sync.json': {
-              content: JSON.stringify(syncDataObj, null, 2)
-            }
-          }
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        console.error('Failed to update gist:', response.status, error);
-        throw new Error('Sync upload failed');
-      }
-      console.log('Successfully updated gist');
+      const r = await fetch(`https://api.github.com/gists/${state.gistId}`, { method: 'PATCH', headers: { 'Authorization': `token ${state.gistToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ files: { 'bloodink-sync.json': { content: JSON.stringify(payload,null,2) } } }) });
+      if (!r.ok) throw new Error('Sync upload failed');
     } else {
-      console.log('Creating new gist...');
-      const response = await fetch('https://api.github.com/gists', {
-        method: 'POST',
-        headers: {
-          'Authorization': `token ${state.gistToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          description: 'Bloodink conversation sync',
-          public: false,
-          files: {
-            'bloodink-sync.json': {
-              content: JSON.stringify(syncDataObj, null, 2)
-            }
-          }
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        console.error('Failed to create gist:', response.status, error);
-        throw new Error('Sync create failed');
-      }
-      
-      const data = await response.json();
-      state.gistId = data.id;
-      saveState();
-      console.log('Created new gist:', state.gistId);
+      const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: { 'Authorization': `token ${state.gistToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ description: 'Bloodink conversation sync', public: false, files: { 'bloodink-sync.json': { content: JSON.stringify(payload,null,2) } } }) });
+      if (!r.ok) throw new Error('Sync create failed');
+      const d = await r.json(); state.gistId = d.id; saveState();
+      if (!silent) showToast(`Gist created — copy ID to Settings on your other device`);
     }
-    
-    renderChatList();
-    renderRecentChats();
-    updateMemoryCount();
-    renderProjects();
-    updateSyncStatus();
-    console.log('=== SYNC COMPLETE ===');
-    if (!silent) showToast(`Synced ✓ (${newChatsAdded} new, ${chatsUpdated} updated)`);
-    
-  } catch (error) {
-    console.error('=== SYNC FAILED ===');
-    console.error(error);
-    if (!silent) showToast('Sync failed: ' + error.message);
-  } finally {
-    clearTimeout(timeoutId);
-    syncInProgress = false;
-    console.log('syncInProgress reset to false');
-  }
+
+    renderChatList(); renderRecentChats(); updateMemoryCount(); renderProjects(); updateSyncStatus();
+    if (!silent) showToast(`Synced ✓ (${added} new, ${updated} updated)`);
+  } catch(e) {
+    console.error('Sync failed:', e);
+    if (!silent) showToast('Sync failed: ' + e.message);
+  } finally { clearTimeout(tid); syncInProgress = false; }
 }
 
-// SEARCH
 function openSearch() {
   document.getElementById('searchInput').value = '';
   document.getElementById('searchResults').innerHTML = '';
   document.getElementById('searchModal').classList.add('visible');
 }
 
-function closeSearch() {
-  document.getElementById('searchModal').classList.remove('visible');
-}
+function closeSearch() { document.getElementById('searchModal').classList.remove('visible'); }
 
 function performSearch() {
-  const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const results = document.getElementById('searchResults');
-  
-  if (!query) {
-    results.innerHTML = '';
-    return;
-  }
-  
+  const q = document.getElementById('searchInput').value.trim().toLowerCase(), results = document.getElementById('searchResults');
+  if (!q) { results.innerHTML = ''; return; }
   const matches = [];
-  
-  state.chats.forEach(chat => {
-    chat.messages.forEach((msg, idx) => {
-      if (msg.content.toLowerCase().includes(query)) {
-        matches.push({
-          chatId: chat.id,
-          chatTitle: chat.title,
-          messageIndex: idx,
-          role: msg.role,
-          preview: msg.content.substring(0, 150)
-        });
-      }
-    });
-  });
-  
-  if (matches.length === 0) {
-    results.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No results found</p>';
-    return;
-  }
-  
-  results.innerHTML = matches.slice(0, 20).map(m => `
-    <div class="memory-item" style="cursor: pointer;" onclick="jumpToMessage('${m.chatId}', ${m.messageIndex})">
+  state.chats.forEach(chat => { chat.messages.forEach((msg, idx) => { if (msg.content.toLowerCase().includes(q)) matches.push({ chatId: chat.id, chatTitle: chat.title, messageIndex: idx, role: msg.role, preview: msg.content.substring(0,150) }); }); });
+  if (!matches.length) { results.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No results found</p>'; return; }
+  results.innerHTML = matches.slice(0,20).map(m => `
+    <div class="memory-item" style="cursor:pointer;" onclick="jumpToMessage('${m.chatId}',${m.messageIndex})">
       <div class="memory-item-name">${escapeHtml(m.chatTitle)}</div>
       <div class="memory-item-meta">${m.role === 'user' ? 'You' : 'Bloodink'}</div>
-      <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${escapeHtml(m.preview)}...</div>
-    </div>
-  `).join('');
+      <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">${escapeHtml(m.preview)}...</div>
+    </div>`).join('');
 }
 
-function jumpToMessage(chatId, messageIndex) {
-  switchChat(chatId);
-  closeSearch();
+function jumpToMessage(chatId, idx) {
+  switchChat(chatId); closeSearch();
   setTimeout(() => {
-    const msgEl = document.querySelector(`[data-index="${messageIndex}"]`);
-    if (msgEl) {
-      msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      msgEl.style.background = 'var(--accent)';
-      msgEl.style.opacity = '0.3';
-      setTimeout(() => {
-        msgEl.style.background = '';
-        msgEl.style.opacity = '';
-      }, 2000);
-    }
+    const el = document.querySelector(`[data-index="${idx}"]`);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.background = 'var(--accent)'; el.style.opacity = '0.3'; setTimeout(() => { el.style.background = ''; el.style.opacity = ''; }, 2000); }
   }, 100);
 }
 
-// GIST WIZARD
-function openGistWizard() {
-  closeSettings();
-  document.getElementById('gistWizardModal').classList.add('visible');
-}
+function openGistWizard() { closeSettings(); document.getElementById('gistWizardModal').classList.add('visible'); }
+function closeGistWizard() { document.getElementById('gistWizardModal').classList.remove('visible'); }
 
-function closeGistWizard() {
-  document.getElementById('gistWizardModal').classList.remove('visible');
-}
-
-// MODEL SWITCHING
 function switchModel(modelId) {
-  const chat = getActiveChat();
-  if (chat) {
-    chat.model = modelId;
-    saveState();
-    
-    const model = MODELS.find(m => m.id === modelId);
-    if (model && !model.hasFunctionCalling) {
-      showToast('⚠️ This model uses background memory creation');
-    } else {
-      showToast('Model switched');
-    }
-  }
+  const chat = getActiveChat(); if (!chat) return;
+  chat.model = modelId; saveState();
+  const m = MODELS.find(x => x.id === modelId);
+  showToast(m && !m.hasFunctionCalling ? '⚠️ This model uses background memory creation' : 'Model switched');
 }
 
 function updateQuickModelSwitch() {
-  const select = document.getElementById('quickModelSwitch');
-  const chat = getActiveChat();
-  
-  if (!chat) {
-    select.innerHTML = '';
-    return;
-  }
-  
+  const select = document.getElementById('quickModelSwitch'), chat = getActiveChat();
+  if (!chat) { select.innerHTML = ''; return; }
   const grouped = {};
-  MODELS.forEach(m => {
-    if (!grouped[m.provider]) grouped[m.provider] = [];
-    grouped[m.provider].push(m);
-  });
-  
-  select.innerHTML = Object.entries(grouped).map(([provider, models]) => `
-    <optgroup label="${provider}">
-      ${models.map(m => `<option value="${m.id}" ${chat.model === m.id ? 'selected' : ''}>${m.name}${!m.hasFunctionCalling ? ' ⚠' : ''}</option>`).join('')}
-    </optgroup>
-  `).join('');
+  MODELS.forEach(m => { if (!grouped[m.provider]) grouped[m.provider] = []; grouped[m.provider].push(m); });
+  select.innerHTML = Object.entries(grouped).map(([p,ms]) => `
+    <optgroup label="${p}">${ms.map(m => `<option value="${m.id}" ${chat.model === m.id ? 'selected' : ''}>${m.name}${!m.hasFunctionCalling ? ' ⚠' : ''}</option>`).join('')}</optgroup>`).join('');
 }
 
-// START
 init();
 </script>
 </body>
