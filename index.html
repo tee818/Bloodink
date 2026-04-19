@@ -91,6 +91,8 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .message-action-btn{background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:4px 8px;transition:color 0.2s}
 .message-action-btn:hover{color:var(--accent)}
 .message-image{max-width:400px;border-radius:8px;margin-top:8px}
+.streaming-cursor{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;animation:blink 0.7s infinite;vertical-align:text-bottom}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .voice-recording{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid var(--accent);padding:16px 24px;border-radius:24px;display:none;align-items:center;gap:12px;z-index:50;box-shadow:0 4px 20px var(--shadow)}
 .voice-recording.active{display:flex}
 .voice-wave{width:200px;height:40px;display:flex;align-items:center;gap:2px}
@@ -246,7 +248,7 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
       <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Firebase API Key</label><input type="password" class="form-input" id="fbApiKey" placeholder="AIza..."></div>
       <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Firebase Project ID</label><input type="text" class="form-input" id="fbProjectId" placeholder="bloodink"></div>
       <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Firebase App ID</label><input type="text" class="form-input" id="fbAppId" placeholder="1:278485405445:web:..."></div>
-      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Sync Key <span style="color:var(--accent);">★ Same on both devices</span></label><input type="text" class="form-input sync-key-highlight" id="fbSyncKey" placeholder="e.g. lexi-bloodink-2025"><small style="color:var(--text-muted);font-size:12px;">Choose any passphrase. Use the exact same one on both your phone and laptop.</small></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Sync Key <span style="color:var(--accent);">★ Same on both devices</span></label><input type="text" class="form-input sync-key-highlight" id="fbSyncKey" placeholder="e.g. lexi-bloodink-2025"><small style="color:var(--text-muted);font-size:12px;">Same passphrase on both devices.</small></div>
     </div>
     <div class="form-group"><label class="form-label">System Prompt</label><textarea class="form-textarea" id="systemPromptInput" style="min-height:150px;font-family:monospace;font-size:12px;"></textarea></div>
     <div class="form-group"><label class="form-label">Model</label><select class="form-input" id="modelSelect"></select></div>
@@ -433,8 +435,17 @@ window.deleteChat=deleteChat;
 function getChat(){return state.chats.find(c=>c.id===state.activeChatId);}
 function renderChatList(){const chats=state.chats.filter(c=>c.projectId===state.activeProjectId).sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));document.getElementById('chatList').innerHTML=chats.map(c=>`<div class="chat-item ${c.id===state.activeChatId?'active':''}" onclick="switchChat('${c.id}')"><div class="chat-item-title">${c.forkedFrom?'<span style="color:var(--text-muted);font-size:11px;margin-right:6px;">↳</span>':''}${esc(c.title)}</div><div class="chat-item-meta">${fmtTime(c.updatedAt||c.createdAt)}</div><button class="delete-chat-btn" onclick="deleteChat('${c.id}',event)">×</button></div>`).join('');}
 
-function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header">${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content">${md(msg.content)}</div>${msg.image?`<img src="${msg.image}" class="message-image">`:''}
+function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header">${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${msg.image?`<img src="${msg.image}" class="message-image">`:''}
 <div class="message-actions"><button class="message-action-btn" onclick="togglePin(${i})">${msg.pinned?'Unpin':'Pin'}</button><button class="message-action-btn" onclick="forkChat(${i})">Fork</button>${msg.role==='assistant'?`<button class="message-action-btn" onclick="regen(${i})">⟳</button><button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>`:msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}</div></div>`).join('');c.scrollTop=c.scrollHeight;}
+
+function updateStreamingMessage(idx,content,done){
+  const el=document.getElementById(`msg-content-${idx}`);
+  if(!el)return;
+  el.innerHTML=md(content)+(done?'':'<span class="streaming-cursor"></span>');
+  const c=document.getElementById('messagesContainer');
+  c.scrollTop=c.scrollHeight;
+}
+
 function editMsg(i){const chat=getChat(),msg=chat.messages[i];const n=prompt('Edit:',msg.content);if(n?.trim()&&n!==msg.content){chat.messages=chat.messages.slice(0,i);chat.messages.push({role:'user',content:n.trim()});chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);}}
 window.editMsg=editMsg;
 function regen(i){const chat=getChat();chat.messages=chat.messages.slice(0,i);chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);}
@@ -475,38 +486,77 @@ async function sendMessage(isRegen=false){
   if(!chat){createNewChat();return sendMessage(isRegen);}
   if(!state.apiKey){showToast('Add API key in Settings');openSettings();return;}
   if(!isRegen){const um={role:'user',content};if(inp.dataset.image){um.image=inp.dataset.image;delete inp.dataset.image;}chat.messages.push(um);}
-  inp.value='';inp.style.height='auto';document.getElementById('sendButton').disabled=true;chat.updatedAt=Date.now();renderMessages();saveLocal();showToast('Sending...');
+  inp.value='';inp.style.height='auto';document.getElementById('sendButton').disabled=true;chat.updatedAt=Date.now();renderMessages();saveLocal();
+
   const mems=getMemories(content);
   const model=MODELS.find(m=>m.id===chat.model);
   const hasFn=model?.hasFn||false;
   const msgs=[{role:'system',content:state.systemPrompt}];
   if(mems.length)msgs.push({role:'system',content:`[MEMORIES]\n\n${mems.map(m=>`## ${m.name}\n${m.content}`).join('\n\n---\n\n')}`});
   msgs.push(...smartCtx(chat.messages,content,mems));
+
   try{
-    const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty};
-    if(hasFn)body.tools=[MEM_TOOL];
-    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
-    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
-    const data=await r.json();
-    if(!data.choices?.[0])throw new Error('Invalid response');
-    const choice=data.choices[0];
-    if(hasFn&&choice.message.tool_calls?.length){
-      const tc=choice.message.tool_calls[0];
-      if(tc.function.name==='create_memory'){
-        const params=JSON.parse(tc.function.arguments),result=mkMem(params);
-        msgs.push(choice.message);msgs.push({role:'tool',tool_call_id:tc.id,content:JSON.stringify(result)});
-        const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature})});
-        const d2=await r2.json();
-        chat.messages.push({role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)});
-        showToast(`Memory saved: ${params.name}`);
+    if(hasFn){
+      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,tools:[MEM_TOOL]};
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
+      const data=await r.json();
+      if(!data.choices?.[0])throw new Error('Invalid response');
+      const choice=data.choices[0];
+      if(choice.message.tool_calls?.length){
+        const tc=choice.message.tool_calls[0];
+        if(tc.function.name==='create_memory'){
+          const params=JSON.parse(tc.function.arguments),result=mkMem(params);
+          msgs.push(choice.message);msgs.push({role:'tool',tool_call_id:tc.id,content:JSON.stringify(result)});
+          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature})});
+          const d2=await r2.json();
+          chat.messages.push({role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)});
+          showToast(`Memory saved: ${params.name}`);
+        }
+      }else{
+        chat.messages.push({role:'assistant',content:choice.message.content,activeMemories:mems.map(m=>m.name)});
       }
-    }else{
-      chat.messages.push({role:'assistant',content:choice.message.content,activeMemories:mems.map(m=>m.name)});
-      if(!hasFn)bgMem(chat.messages).catch(e=>console.error(e));
+      chat.updatedAt=Date.now();renderMessages();saveAndSync();
+    } else {
+      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,stream:true};
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
+      const assistantMsg={role:'assistant',content:'',activeMemories:mems.map(m=>m.name)};
+      chat.messages.push(assistantMsg);
+      const msgIdx=chat.messages.length-1;
+      renderMessages();
+      const reader=r.body.getReader();
+      const decoder=new TextDecoder();
+      let buffer='';
+      while(true){
+        const{done,value}=await reader.read();
+        if(done)break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n');
+        buffer=lines.pop();
+        for(const line of lines){
+          if(!line.startsWith('data: '))continue;
+          const data=line.slice(6);
+          if(data==='[DONE]')continue;
+          try{
+            const parsed=JSON.parse(data);
+            const delta=parsed.choices?.[0]?.delta?.content;
+            if(delta){assistantMsg.content+=delta;updateStreamingMessage(msgIdx,assistantMsg.content,false);}
+          }catch(e){}
+        }
+      }
+      updateStreamingMessage(msgIdx,assistantMsg.content,true);
+      chat.updatedAt=Date.now();
+      saveAndSync();
+      bgMem(chat.messages).catch(e=>console.error(e));
     }
-    chat.updatedAt=Date.now();renderMessages();saveAndSync();
     if(chat.messages.filter(m=>m.role==='user').length===1&&chat.title==='New conversation')setTimeout(()=>autoName(chat),1000);
-  }catch(err){showToast('Error: '+err.message);if(!isRegen)chat.messages.pop();renderMessages();}
+  }catch(err){
+    showToast('Error: '+err.message);
+    if(!isRegen)chat.messages.pop();
+    renderMessages();
+  }
+  document.getElementById('sendButton').disabled=false;
 }
 window.sendMessage=sendMessage;
 
@@ -557,7 +607,7 @@ window.performSearch=performSearch;
 function jumpTo(chatId,idx){switchChat(chatId);closeSearch();setTimeout(()=>{const el=document.querySelector(`[data-index="${idx}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.background='var(--accent)';el.style.opacity='0.3';setTimeout(()=>{el.style.background='';el.style.opacity='';},2000);}},100);}
 window.jumpTo=jumpTo;
 
-function switchModel(id){const chat=getChat();if(!chat)return;chat.model=id;saveLocal();const m=MODELS.find(x=>x.id===id);showToast(m&&!m.hasFn?'⚠️ Background memory mode':'Model switched');}
+function switchModel(id){const chat=getChat();if(!chat)return;chat.model=id;saveLocal();const m=MODELS.find(x=>x.id===id);showToast(m&&!m.hasFn?'Streaming mode':'Model switched');}
 window.switchModel=switchModel;
 function updateQuickModelSwitch(){const select=document.getElementById('quickModelSwitch'),chat=getChat();if(!chat){select.innerHTML='';return;}const g={};MODELS.forEach(m=>{if(!g[m.provider])g[m.provider]=[];g[m.provider].push(m);});select.innerHTML=Object.entries(g).map(([p,ms])=>`<optgroup label="${p}">${ms.map(m=>`<option value="${m.id}" ${chat.model===m.id?'selected':''}>${m.name}${!m.hasFn?' ⚠':''}</option>`).join('')}</optgroup>`).join('');}
 
