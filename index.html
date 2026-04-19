@@ -71,6 +71,7 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .sidebar-btn{width:100%;background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-primary);padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;text-align:left;margin-bottom:8px;transition:all 0.2s}
 .sidebar-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .sidebar-content{flex:1;overflow-y:auto;padding:12px}
+.project-label{padding:6px 16px 10px;font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .chat-item{padding:12px 16px;border-radius:8px;cursor:pointer;margin-bottom:4px;font-size:14px;color:var(--text-secondary);transition:all 0.2s;position:relative}
 .chat-item:hover{background:var(--bg-tertiary)}
 .chat-item.active{background:var(--bg-tertiary);color:var(--text-primary);border-left:3px solid var(--accent)}
@@ -433,7 +434,13 @@ window.switchChat=switchChat;
 function deleteChat(id,e){e.stopPropagation();if(!confirm('Delete this conversation?'))return;state.chats=state.chats.filter(c=>c.id!==id);if(state.activeChatId===id)showHomepage();renderChatList();saveAndSync();showToast('Conversation deleted');}
 window.deleteChat=deleteChat;
 function getChat(){return state.chats.find(c=>c.id===state.activeChatId);}
-function renderChatList(){const chats=state.chats.filter(c=>c.projectId===state.activeProjectId).sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));document.getElementById('chatList').innerHTML=chats.map(c=>`<div class="chat-item ${c.id===state.activeChatId?'active':''}" onclick="switchChat('${c.id}')"><div class="chat-item-title">${c.forkedFrom?'<span style="color:var(--text-muted);font-size:11px;margin-right:6px;">↳</span>':''}${esc(c.title)}</div><div class="chat-item-meta">${fmtTime(c.updatedAt||c.createdAt)}</div><button class="delete-chat-btn" onclick="deleteChat('${c.id}',event)">×</button></div>`).join('');}
+
+function renderChatList(){
+  const proj=state.projects.find(p=>p.id===state.activeProjectId);
+  const chats=state.chats.filter(c=>c.projectId===state.activeProjectId).sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+  const header=proj?`<div class="project-label" style="border-left:3px solid ${proj.color};">${proj.name}</div>`:'';
+  document.getElementById('chatList').innerHTML=header+chats.map(c=>`<div class="chat-item ${c.id===state.activeChatId?'active':''}" onclick="switchChat('${c.id}')"><div class="chat-item-title">${c.forkedFrom?'<span style="color:var(--text-muted);font-size:11px;margin-right:6px;">↳</span>':''}${esc(c.title)}</div><div class="chat-item-meta">${fmtTime(c.updatedAt||c.createdAt)}</div><button class="delete-chat-btn" onclick="deleteChat('${c.id}',event)">×</button></div>`).join('');
+}
 
 function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header">${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${msg.image?`<img src="${msg.image}" class="message-image">`:''}
 <div class="message-actions"><button class="message-action-btn" onclick="togglePin(${i})">${msg.pinned?'Unpin':'Pin'}</button><button class="message-action-btn" onclick="forkChat(${i})">Fork</button>${msg.role==='assistant'?`<button class="message-action-btn" onclick="regen(${i})">⟳</button><button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>`:msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}</div></div>`).join('');c.scrollTop=c.scrollHeight;}
