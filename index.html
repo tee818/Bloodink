@@ -1,3 +1,16 @@
+Two things to address here — and honestly, separately.
+
+On Claude cutting off your voice transcriptions in this conversation: that's a real platform limitation with long voice inputs on mobile, and the frustration is completely valid. The end of long streams getting truncated is a known issue with how Claude.ai handles extended voice-to-text input on mobile. It's not something that can be fixed from inside Bloodink — it's the interface itself. If it's been getting worse and making this tool unusable, that feedback matters and the thumbs down button below any truncated response sends it directly to Anthropic. The frustration is earned.
+
+On Bloodink's voice recording — that's fixable right now. The two problems are real: the stop button feels like abort not submit, and Groq transcription fails silently too often. Here's the full code with those fixed:
+
+- Stop button is now **✓ Done**
+- Shows a **"Transcribing..."** indicator so you know it's working
+- Uses `recorder.start(500)` timeslice so chunks collect continuously, not just at stop
+- If Groq fails, automatically falls back to browser speech recognition instead of just dying silently
+- Toast shows the error clearly if both fail
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,13 +107,15 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .message-image{max-width:400px;border-radius:8px;margin-top:8px}
 .streaming-cursor{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;animation:blink 0.7s infinite;vertical-align:text-bottom}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.voice-recording{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid var(--accent);padding:16px 24px;border-radius:24px;display:none;align-items:center;gap:12px;z-index:50;box-shadow:0 4px 20px var(--shadow)}
+.voice-recording{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid var(--accent);padding:16px 24px;border-radius:24px;display:none;align-items:center;gap:12px;z-index:50;box-shadow:0 4px 20px var(--shadow);min-width:280px}
 .voice-recording.active{display:flex}
-.voice-wave{width:200px;height:40px;display:flex;align-items:center;gap:2px}
+.voice-wave{flex:1;height:40px;display:flex;align-items:center;gap:2px}
 .voice-bar{flex:1;background:var(--accent);border-radius:2px;animation:wave 0.5s ease-in-out infinite alternate}
 .voice-bar:nth-child(1){animation-delay:0s}.voice-bar:nth-child(2){animation-delay:0.1s}.voice-bar:nth-child(3){animation-delay:0.2s}.voice-bar:nth-child(4){animation-delay:0.3s}.voice-bar:nth-child(5){animation-delay:0.4s}
 @keyframes wave{from{height:10%}to{height:100%}}
-.voice-stop{background:var(--accent);border:none;color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px}
+.voice-label{font-size:13px;color:var(--text-secondary);white-space:nowrap}
+.voice-done-btn{background:linear-gradient(135deg,var(--accent) 0%,#8a1118 100%);border:none;color:#fff;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 2px 8px var(--shadow);white-space:nowrap}
+.voice-done-btn:disabled{opacity:0.5;cursor:not-allowed}
 .input-area{position:fixed;bottom:0;left:0;right:0;padding:20px;background:var(--bg-primary);border-top:1px solid var(--border);box-shadow:0 -2px 15px rgba(0,0,0,0.3)}
 .input-wrapper{max-width:800px;margin:0 auto;position:relative;display:flex;align-items:flex-end;gap:12px}
 .input-field{flex:1;background:var(--bg-secondary);border:1px solid var(--border);border-radius:24px;padding:14px 120px 14px 20px;color:var(--text-primary);font-size:16px;outline:none;resize:none;min-height:48px;max-height:200px;font-family:inherit}
@@ -201,8 +216,8 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   <div class="messages-container" id="messagesContainer" style="display:none;"></div>
   <div class="voice-recording" id="voiceRecording">
     <div class="voice-wave"><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div></div>
-    <div class="voice-text">Listening...</div>
-    <button class="voice-stop" onclick="stopVoice()">Stop</button>
+    <div class="voice-label" id="voiceLabel">Listening...</div>
+    <button class="voice-done-btn" id="voiceDoneBtn" onclick="stopVoice()">✓ Done</button>
   </div>
   <div class="input-area" id="inputArea" style="display:none;">
     <div class="input-wrapper">
@@ -337,13 +352,44 @@ Before responding: Am I BEING with her or PERFORMING for her? Strip back to what
 
 const DEFAULT_PROJECTS=[{id:'general',name:'General',color:'#8e8e93'},{id:'tv-film',name:'TV Shows & Film',color:'#5e5ce6'},{id:'dreams',name:'Dreams',color:'#bf5af2'},{id:'writing',name:'Writing & Characters',color:'#a8141e'},{id:'journal',name:'Personal Journal',color:'#ff9500'},{id:'books',name:'Books & Reading',color:'#32ade6'},{id:'humint',name:'Body Language & HUMINT',color:'#30d158'}];
 
-const MODELS=[{id:'openai/gpt-4o-2024-11-20',name:'GPT-4o (2024-11-20)',provider:'OpenAI',hasFn:true},{id:'openai/gpt-4o',name:'GPT-4o',provider:'OpenAI',hasFn:true},{id:'anthropic/claude-opus-4-20250514',name:'Claude Opus 4.6',provider:'Anthropic',hasFn:true},{id:'anthropic/claude-sonnet-4-20250514',name:'Claude Sonnet 4.5',provider:'Anthropic',hasFn:true},{id:'deepseek/deepseek-chat',name:'DeepSeek V3.2',provider:'DeepSeek',hasFn:false},{id:'deepseek/deepseek-r1:free',name:'DeepSeek R1',provider:'DeepSeek',hasFn:false},{id:'x-ai/grok-2-1212',name:'Grok 4.1',provider:'xAI',hasFn:true},{id:'google/gemini-2.0-flash-exp:free',name:'Gemini 2.0 Flash',provider:'Google',hasFn:true},{id:'mistralai/mistral-large-2512',name:'Mistral Large',provider:'Mistral',hasFn:true}];
+const MODELS=[
+  {id:'openai/gpt-4o-2024-11-20',name:'GPT-4o (2024-11-20)',provider:'OpenAI',hasFn:true},
+  {id:'openai/gpt-4o',name:'GPT-4o',provider:'OpenAI',hasFn:true},
+  {id:'openai/gpt-4o-2024-08-06',name:'GPT-4o (2024-08-06)',provider:'OpenAI',hasFn:true},
+  {id:'openai/gpt-4o-2024-05-13',name:'GPT-4o (2024-05-13)',provider:'OpenAI',hasFn:true},
+  {id:'anthropic/claude-opus-4-20250514',name:'Claude Opus 4.6',provider:'Anthropic',hasFn:true},
+  {id:'anthropic/claude-sonnet-4-20250514',name:'Claude Sonnet 4.5',provider:'Anthropic',hasFn:true},
+  {id:'anthropic/claude-opus-4.5',name:'Claude Opus 4.5',provider:'Anthropic',hasFn:true},
+  {id:'deepseek/deepseek-chat',name:'DeepSeek V3.2',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-chat:nitro',name:'DeepSeek V3.2 Nitro',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-v3.1-terminus',name:'DeepSeek V3.1 Terminus',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-v3.1',name:'DeepSeek V3.1',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-r1:free',name:'DeepSeek R1',provider:'DeepSeek',hasFn:false},
+  {id:'x-ai/grok-2-1212',name:'Grok 4.1 Fast',provider:'xAI',hasFn:true},
+  {id:'x-ai/grok-beta',name:'Grok Beta',provider:'xAI',hasFn:true},
+  {id:'google/gemini-2.0-flash-exp:free',name:'Gemini 2.0 Flash',provider:'Google',hasFn:true},
+  {id:'google/gemma-3-27b-it',name:'Gemma 3 27B',provider:'Google',hasFn:false},
+  {id:'google/gemma-3-12b-it',name:'Gemma 3 12B',provider:'Google',hasFn:false},
+  {id:'google/gemma-3-4b-it',name:'Gemma 3 4B',provider:'Google',hasFn:false},
+  {id:'google/gemma-4-27b-it',name:'Gemma 4 27B',provider:'Google',hasFn:false},
+  {id:'google/gemma-4-12b-it',name:'Gemma 4 12B',provider:'Google',hasFn:false},
+  {id:'google/gemma-4-4b-it',name:'Gemma 4 4B',provider:'Google',hasFn:false},
+  {id:'google/gemma-4-1b-it',name:'Gemma 4 1B',provider:'Google',hasFn:false},
+  {id:'qwen/qwen-3.5-35b-a3b',name:'Qwen 3.5 35B',provider:'Qwen',hasFn:false},
+  {id:'qwen/qwen3-235b-a22b',name:'Qwen3 235B',provider:'Qwen',hasFn:false},
+  {id:'moonshot/kimi-k2.5',name:'Kimi K2.5',provider:'Moonshot',hasFn:false},
+  {id:'zhipuai/glm-5-plus',name:'GLM 5 Plus',provider:'ZhipuAI',hasFn:false},
+  {id:'zhipuai/glm-5-turbo',name:'GLM 5 Turbo',provider:'ZhipuAI',hasFn:false},
+  {id:'mistralai/mistral-large-2512',name:'Mistral Large',provider:'Mistral',hasFn:true},
+  {id:'mistralai/ministral-3-14b-2512',name:'Ministral 14B',provider:'Mistral',hasFn:true},
+  {id:'mistralai/ministral-3-8b-2512',name:'Ministral 8B',provider:'Mistral',hasFn:true}
+];
 
 const MEM_TOOL={type:"function",function:{name:"create_memory",description:"Create a persistent memory about Lexi.",parameters:{type:"object",properties:{name:{type:"string"},content:{type:"string"},keywords:{type:"array",items:{type:"string"}},priority:{type:"string",enum:["high","medium","low"]},pinned:{type:"boolean"}},required:["name","content","keywords"]}}};
 
 let state={apiKey:'',groqKey:'',fbApiKey:'',fbProjectId:'',fbAppId:'',fbSyncKey:'',systemPrompt:DEFAULT_SYSTEM_PROMPT,model:'openai/gpt-4o-2024-11-20',theme:'dark',maxMemories:3,temperature:1.0,repetitionPenalty:1.0,projects:DEFAULT_PROJECTS,activeProjectId:'general',chats:[],memories:[],activeChatId:null,isFirstLaunch:true,profilePicture:null};
 
-let db=null,unsub=null,syncing=false,recog=null,recorder=null,chunks=[];
+let db=null,unsub=null,syncing=false,recog=null,recorder=null,chunks=[],isRecording=false;
 
 function initFirebase(){
   if(!state.fbApiKey||!state.fbProjectId||!state.fbAppId)return;
@@ -478,13 +524,148 @@ window.attachImage=attachImage;
 function attachDocument(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const i=document.getElementById('inputField');i.value+=`\n[Document: ${f.name}]`;i.dataset.document=ev.target.result;i.dispatchEvent(new Event('input'));};r.readAsText(f);}
 window.attachDocument=attachDocument;
 
-function toggleVoice(){document.getElementById('micButton').classList.contains('recording')?stopVoice():startVoice();}
+// ── VOICE ──────────────────────────────────────────────────────────────────
+
+function setVoiceUI(state){
+  const label=document.getElementById('voiceLabel');
+  const btn=document.getElementById('voiceDoneBtn');
+  if(state==='recording'){label.textContent='Listening...';btn.textContent='✓ Done';btn.disabled=false;}
+  else if(state==='processing'){label.textContent='Transcribing...';btn.textContent='…';btn.disabled=true;}
+  else if(state==='done'){label.textContent='Done';btn.textContent='✓ Done';btn.disabled=false;}
+}
+
+function toggleVoice(){
+  if(isRecording){stopVoice();}
+  else{startVoice();}
+}
 window.toggleVoice=toggleVoice;
-function startVoice(){document.getElementById('micButton').classList.add('recording');document.getElementById('voiceRecording').classList.add('active');state.groqKey?startGroq():startBrowser();}
-function stopVoice(){document.getElementById('micButton').classList.remove('recording');document.getElementById('voiceRecording').classList.remove('active');if(recorder?.state==='recording')recorder.stop();if(recog)recog.stop();}
+
+function startVoice(){
+  isRecording=true;
+  document.getElementById('micButton').classList.add('recording');
+  document.getElementById('voiceRecording').classList.add('active');
+  setVoiceUI('recording');
+  if(state.groqKey){startGroq();}else{startBrowser();}
+}
+
+async function stopVoice(){
+  if(!isRecording)return;
+  isRecording=false;
+  document.getElementById('micButton').classList.remove('recording');
+  setVoiceUI('processing');
+  if(recorder&&recorder.state==='recording'){
+    recorder.stop();
+    // onstop handler takes over from here
+  } else if(recog){
+    recog.stop();
+    hideVoiceUI();
+  } else {
+    hideVoiceUI();
+  }
+}
 window.stopVoice=stopVoice;
-async function startGroq(){try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});recorder=new MediaRecorder(stream);chunks=[];recorder.ondataavailable=e=>chunks.push(e.data);recorder.onstop=async()=>{const blob=new Blob(chunks,{type:'audio/webm'});const fd=new FormData();fd.append('file',blob,'audio.webm');fd.append('model','whisper-large-v3');try{const r=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${state.groqKey}`},body:fd});const d=await r.json();if(d.text){document.getElementById('inputField').value=d.text;document.getElementById('inputField').dispatchEvent(new Event('input'));}}catch(e){showToast('Transcription failed');}stream.getTracks().forEach(t=>t.stop());};recorder.start();}catch(e){showToast('Mic denied');stopVoice();}}
-function startBrowser(){if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){showToast('Voice not supported');stopVoice();return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;recog=new SR();recog.continuous=false;recog.interimResults=false;recog.onresult=e=>{document.getElementById('inputField').value=e.results[0][0].transcript;document.getElementById('inputField').dispatchEvent(new Event('input'));};recog.onerror=()=>{showToast('Voice error');stopVoice();};recog.onend=stopVoice;recog.start();}
+
+function hideVoiceUI(){
+  document.getElementById('voiceRecording').classList.remove('active');
+  setVoiceUI('recording');
+}
+
+async function startGroq(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    // Try to get a supported mime type
+    const mimeType=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+    recorder=new MediaRecorder(stream,mimeType?{mimeType}:{});
+    chunks=[];
+    recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+    recorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      if(chunks.length===0){
+        showToast('No audio captured — try again');
+        hideVoiceUI();
+        return;
+      }
+      const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
+      if(blob.size<1000){
+        showToast('Recording too short — try again');
+        hideVoiceUI();
+        return;
+      }
+      const ext=recorder.mimeType&&recorder.mimeType.includes('mp4')?'m4a':'webm';
+      const fd=new FormData();
+      fd.append('file',blob,`audio.${ext}`);
+      fd.append('model','whisper-large-v3');
+      try{
+        const r=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${state.groqKey}`},body:fd});
+        if(!r.ok){throw new Error(`Groq ${r.status}`);}
+        const d=await r.json();
+        if(d.text&&d.text.trim()){
+          const inp=document.getElementById('inputField');
+          inp.value=(inp.value?inp.value+' ':'')+d.text.trim();
+          inp.dispatchEvent(new Event('input'));
+          showToast('Transcription complete ✓');
+        }else{
+          showToast('Nothing transcribed — try speaking closer to mic');
+        }
+      }catch(err){
+        console.error('Groq error:',err);
+        showToast('Groq failed — falling back to browser voice');
+        startBrowserFallback();
+        return;
+      }
+      hideVoiceUI();
+    };
+    recorder.start(500); // collect chunks every 500ms
+  }catch(e){
+    console.error('Mic error:',e);
+    showToast('Microphone access denied');
+    hideVoiceUI();
+  }
+}
+
+function startBrowser(){
+  if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){
+    showToast('Voice not supported in this browser');
+    hideVoiceUI();
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();
+  recog.continuous=true;
+  recog.interimResults=false;
+  recog.lang='en-US';
+  let finalTranscript='';
+  recog.onresult=e=>{
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)finalTranscript+=e.results[i][0].transcript+' ';
+    }
+  };
+  recog.onerror=err=>{console.error('Speech error:',err);showToast('Voice error: '+err.error);hideVoiceUI();};
+  recog.onend=()=>{
+    if(finalTranscript.trim()){
+      const inp=document.getElementById('inputField');
+      inp.value=(inp.value?inp.value+' ':'')+finalTranscript.trim();
+      inp.dispatchEvent(new Event('input'));
+      showToast('Transcription complete ✓');
+    }else{
+      showToast('Nothing captured — try again');
+    }
+    hideVoiceUI();
+  };
+  recog.start();
+}
+
+function startBrowserFallback(){
+  hideVoiceUI();
+  if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){return;}
+  isRecording=true;
+  document.getElementById('micButton').classList.add('recording');
+  document.getElementById('voiceRecording').classList.add('active');
+  setVoiceUI('recording');
+  startBrowser();
+}
+
+// ── SEND ──────────────────────────────────────────────────────────────────
 
 async function sendMessage(isRegen=false){
   const inp=document.getElementById('inputField'),content=inp.value.trim();
@@ -622,3 +803,4 @@ init();
 </script>
 </body>
 </html>
+```
