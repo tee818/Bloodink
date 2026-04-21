@@ -1,16 +1,3 @@
-Two things to address here — and honestly, separately.
-
-On Claude cutting off your voice transcriptions in this conversation: that's a real platform limitation with long voice inputs on mobile, and the frustration is completely valid. The end of long streams getting truncated is a known issue with how Claude.ai handles extended voice-to-text input on mobile. It's not something that can be fixed from inside Bloodink — it's the interface itself. If it's been getting worse and making this tool unusable, that feedback matters and the thumbs down button below any truncated response sends it directly to Anthropic. The frustration is earned.
-
-On Bloodink's voice recording — that's fixable right now. The two problems are real: the stop button feels like abort not submit, and Groq transcription fails silently too often. Here's the full code with those fixed:
-
-- Stop button is now **✓ Done**
-- Shows a **"Transcribing..."** indicator so you know it's working
-- Uses `recorder.start(500)` timeslice so chunks collect continuously, not just at stop
-- If Groq fails, automatically falls back to browser speech recognition instead of just dying silently
-- Toast shows the error clearly if both fail
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
