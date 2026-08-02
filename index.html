@@ -335,9 +335,9 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   <div class="modal-content">
     <div class="modal-header">Import conversations</div>
     <div class="form-group">
-      <label class="form-label">JSON files — select as many as you like</label>
-      <input type="file" class="form-input" id="importFiles" accept=".json,application/json" multiple>
-      <small style="color:var(--text-muted);font-size:12px;display:block;margin-top:6px;">Bloodink exports, a single conversation, an array of conversations, or ChatGPT/Claude-style exports.</small>
+      <label class="form-label">JSON, Markdown or text files — select as many as you like</label>
+      <input type="file" class="form-input" id="importFiles" accept=".json,.md,.markdown,.txt,application/json,text/markdown,text/plain" multiple>
+      <small style="color:var(--text-muted);font-size:12px;display:block;margin-top:6px;">JSON: Bloodink exports, ChatGPT/Claude exports, single conversations or arrays. Markdown/txt: one conversation per file, split on speaker headings when it finds them.</small>
     </div>
     <div class="form-group">
       <label class="form-label">Put them in</label>
@@ -348,9 +348,20 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
       <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;margin-bottom:8px;"><div id="importBar" style="height:100%;width:0%;background:var(--accent);transition:width .2s;"></div></div>
       <div id="importStatus" style="font-size:12px;color:var(--text-secondary);"></div>
     </div>
+    <div id="importPicker" style="display:none;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <input type="text" class="form-input" id="importSearch" placeholder="Filter by title…" oninput="renderImportList()" style="flex:1;min-width:160px;">
+        <button class="btn-small" onclick="pickAll(true)">All</button>
+        <button class="btn-small" onclick="pickAll(false)">None</button>
+        <button class="btn-small" onclick="pickNewest(50)">Newest 50</button>
+        <button class="btn-small" onclick="pickNewest(200)">Newest 200</button>
+      </div>
+      <div id="importList" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+      <div id="importCount" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></div>
+    </div>
     <div id="importSummary" style="font-size:13px;color:var(--text-secondary);"></div>
     <div id="importStorage" style="font-size:11px;color:var(--text-muted);margin-top:12px;"></div>
-    <div class="modal-footer"><button class="btn-secondary" onclick="closeImport()">Close</button><button class="btn-primary" id="importRunBtn" onclick="runImport()">Import</button></div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeImport()">Close</button><button class="btn-secondary" id="importScanBtn" onclick="scanImport()">Scan files</button><button class="btn-primary" id="importRunBtn" onclick="runImport()" disabled>Import selected</button></div>
   </div>
 </div>
 
@@ -962,6 +973,13 @@ function normMsg(m){
 }
 function chatFromMapping(c){
   const msgs=Object.values(c.mapping||{}).map(n=>n&&n.message).filter(Boolean)
+    .filter(m=>{
+      const r=m.author&&m.author.role;
+      if(r!=='user'&&r!=='assistant')return false;
+      if(m.metadata&&(m.metadata.is_visually_hidden_from_conversation||m.metadata.is_user_system_message))return false;
+      const ct=m.content&&m.content.content_type;
+      return !ct||ct==='text'||ct==='multimodal_text';
+    })
     .sort((a,b)=>(a.create_time||0)-(b.create_time||0))
     .map(m=>normMsg({role:m.author&&m.author.role,content:(m.content&&m.content.parts)||m.content}))
     .filter(Boolean);
@@ -996,8 +1014,11 @@ function collectChats(data,out){
 async function openImport(){
   document.getElementById('importSummary').innerHTML='';
   document.getElementById('importProgress').style.display='none';
+  document.getElementById('importPicker').style.display='none';
   document.getElementById('importBar').style.width='0%';
   document.getElementById('importFiles').value='';
+  document.getElementById('importRunBtn').disabled=true;
+  importCandidates=[];importPicked=new Set();importMems=[];importProjs=[];
   document.getElementById('importProject').innerHTML='<option value="__keep">Keep original / current project</option>'+state.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   document.getElementById('importModal').classList.add('visible');
   if(document.getElementById('sidebar').classList.contains('open'))toggleSidebar();
@@ -1009,50 +1030,165 @@ function closeImport(){document.getElementById('importModal').classList.remove('
 window.closeImport=closeImport;
 window.importConversation=openImport;
 
-async function runImport(){
+let importCandidates=[],importPicked=new Set(),importMems=[],importProjs=[];
+const chatSig=c=>c.title+'|'+c.messages.length+'|'+((c.messages[0]&&c.messages[0].content)||'').slice(0,120);
+
+const USER_LABELS=/^(you|user|me|lexi|human|prompt|q)$/i;
+const AI_LABELS=/^(chatgpt|gpt|gpt-4o|assistant|ai|bloodink|claude|bot|answer|a)$/i;
+
+function speakerOf(line){
+  let m=line.match(/^#{1,6}\s*\**\s*([A-Za-z0-9 _-]{1,20})\s*\**\s*:?\s*$/);
+  if(!m)m=line.match(/^\*\*\s*([A-Za-z0-9 _-]{1,20})\s*\*\*\s*:?\s*$/);
+  if(!m)m=line.match(/^\*\*\s*([A-Za-z0-9 _-]{1,20})\s*:\s*\*\*\s*(.*)$/);
+  if(!m)m=line.match(/^([A-Za-z0-9 _-]{1,20})\s*:\s*$/);
+  if(!m)return null;
+  const name=m[1].trim();
+  if(USER_LABELS.test(name))return {role:'user',rest:m[2]||''};
+  if(AI_LABELS.test(name))return {role:'assistant',rest:m[2]||''};
+  return null;
+}
+
+function chatFromMarkdown(text,filename){
+  const lines=text.split(/\r?\n/);
+  const msgs=[];
+  let cur=null;
+  lines.forEach(line=>{
+    const sp=speakerOf(line.trim());
+    if(sp){
+      if(cur&&cur.content.join('\n').trim())msgs.push({role:cur.role,content:cur.content.join('\n').trim()});
+      cur={role:sp.role,content:sp.rest?[sp.rest]:[]};
+    }else if(cur){cur.content.push(line);}
+  });
+  if(cur&&cur.content.join('\n').trim())msgs.push({role:cur.role,content:cur.content.join('\n').trim()});
+  const headingMatch=text.match(/^#\s+(.+)$/m);
+  const title=(headingMatch?headingMatch[1]:filename.replace(/\.(md|markdown|txt)$/i,'')).trim().slice(0,120);
+  if(!msgs.length){
+    const body=text.trim();
+    if(!body)return null;
+    return {id:newId(),title,projectId:null,model:state.model,messages:[{role:'assistant',content:body}],createdAt:Date.now(),updatedAt:Date.now()};
+  }
+  return {id:newId(),title,projectId:null,model:state.model,messages:msgs,createdAt:Date.now(),updatedAt:Date.now()};
+}
+
+async function scanImport(){
   const files=[...document.getElementById('importFiles').files];
   if(!files.length){showToast('Pick at least one JSON file');return;}
+  const scanBtn=document.getElementById('importScanBtn');scanBtn.disabled=true;
+  document.getElementById('importProgress').style.display='block';
+  document.getElementById('importSummary').innerHTML='';
+  const bar=document.getElementById('importBar'),status=document.getElementById('importStatus');
+  importCandidates=[];importPicked=new Set();importMems=[];importProjs=[];
+  let failed=0;
+  const haveSigs=new Set(state.chats.map(chatSig));
+  const haveIds=new Set(state.chats.map(c=>c.id));
+  for(let f=0;f<files.length;f++){
+    const mb=(files[f].size/1048576).toFixed(0);
+    status.textContent=`Reading ${files[f].name} (${f+1} of ${files.length}, ${mb} MB)…`;
+    bar.style.width=((f/files.length)*100).toFixed(1)+'%';
+    await new Promise(r=>setTimeout(r,20));
+    const isText=/\.(md|markdown|txt)$/i.test(files[f].name);
+    if(isText){
+      let raw='';
+      try{raw=await files[f].text();}
+      catch(e){console.error('Read',files[f].name,e);failed++;continue;}
+      const c=chatFromMarkdown(raw,files[f].name);
+      if(c){
+        c.__dupe=haveIds.has(c.id)||haveSigs.has(chatSig(c));
+        importCandidates.push(c);
+      }else{failed++;}
+      await new Promise(r=>setTimeout(r,0));
+      continue;
+    }
+    let data;
+    try{data=JSON.parse(await files[f].text());}
+    catch(e){console.error('Parse',files[f].name,e);failed++;continue;}
+    if(data&&Array.isArray(data.memories))importMems.push(...data.memories);
+    if(data&&Array.isArray(data.projects))importProjs.push(...data.projects);
+    collectChats(data,[]).forEach(c=>{
+      c.__dupe=haveIds.has(c.id)||haveSigs.has(chatSig(c));
+      importCandidates.push(c);
+    });
+    data=null;
+    await new Promise(r=>setTimeout(r,0));
+  }
+  bar.style.width='100%';
+  importCandidates.sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+  status.textContent=`Found ${importCandidates.length} conversations${failed?` — ${failed} file(s) unreadable`:''}`;
+  document.getElementById('importPicker').style.display='block';
+  pickNewest(50);
+  scanBtn.disabled=false;
+}
+window.scanImport=scanImport;
+
+function filteredIdx(){
+  const q=document.getElementById('importSearch').value.trim().toLowerCase();
+  const out=[];
+  importCandidates.forEach((c,i)=>{if(!q||c.title.toLowerCase().includes(q))out.push(i);});
+  return out;
+}
+function renderImportList(){
+  const idx=filteredIdx(),cap=idx.slice(0,400);
+  document.getElementById('importList').innerHTML=cap.map(i=>{
+    const c=importCandidates[i];
+    const when=new Date(c.updatedAt||c.createdAt).toLocaleDateString();
+    return `<label style="display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;"><input type="checkbox" ${importPicked.has(i)?'checked':''} onchange="togglePick(${i},this.checked)" style="margin-top:3px;"><span style="flex:1;min-width:0;"><span style="display:block;color:var(--text-primary);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.title)}</span><span style="font-size:11px;color:var(--text-muted);">${when} • ${c.messages.length} messages${c.__dupe?' • already here':''}</span></span></label>`;
+  }).join('')+(idx.length>cap.length?`<div style="padding:10px 12px;font-size:11px;color:var(--text-muted);">Showing first 400 of ${idx.length} — narrow the filter to see more</div>`:'');
+  updatePickCount();
+}
+window.renderImportList=renderImportList;
+function togglePick(i,on){if(on)importPicked.add(i);else importPicked.delete(i);updatePickCount();}
+window.togglePick=togglePick;
+function updatePickCount(){
+  document.getElementById('importCount').textContent=`${importPicked.size} of ${importCandidates.length} selected`;
+  document.getElementById('importRunBtn').disabled=importPicked.size===0;
+}
+function pickAll(on){
+  const skip=document.getElementById('importSkipDupes').checked;
+  const idx=filteredIdx();
+  if(on)idx.forEach(i=>{if(!(skip&&importCandidates[i].__dupe))importPicked.add(i);});
+  else idx.forEach(i=>importPicked.delete(i));
+  renderImportList();
+}
+window.pickAll=pickAll;
+function pickNewest(n){
+  importPicked=new Set();
+  const skip=document.getElementById('importSkipDupes').checked;
+  let count=0;
+  for(let i=0;i<importCandidates.length&&count<n;i++){
+    if(skip&&importCandidates[i].__dupe)continue;
+    importPicked.add(i);count++;
+  }
+  renderImportList();
+}
+window.pickNewest=pickNewest;
+
+async function runImport(){
+  if(!importPicked.size){showToast('Nothing selected');return;}
   const target=document.getElementById('importProject').value;
-  const skipDupes=document.getElementById('importSkipDupes').checked;
   const btn=document.getElementById('importRunBtn');btn.disabled=true;
   document.getElementById('importProgress').style.display='block';
   const bar=document.getElementById('importBar'),status=document.getElementById('importStatus');
-  let added=0,skipped=0,failed=0,mems=0;
-  const sig=c=>c.title+'|'+c.messages.length+'|'+((c.messages[0]&&c.messages[0].content)||'').slice(0,120);
   const ids=new Set(state.chats.map(c=>c.id));
-  const sigs=new Set(state.chats.map(sig));
-  for(let f=0;f<files.length;f++){
-    status.textContent=`Reading ${files[f].name} (${f+1} of ${files.length})…`;
-    await new Promise(r=>setTimeout(r,0));
-    let data;
-    try{data=JSON.parse(await files[f].text());}
-    catch(e){failed++;continue;}
-    if(data&&Array.isArray(data.memories)){
-      data.memories.forEach(m=>{
-        if(m&&m.name&&!state.memories.some(x=>x.name===m.name)){
-          state.memories.push({id:m.id||newId(),name:m.name,content:m.content||'',keywords:m.keywords||[],priority:m.priority||'medium',pinned:!!m.pinned,createdAt:m.createdAt||Date.now()});
-          mems++;
-        }
-      });
+  const chosen=[...importPicked].sort((a,b)=>a-b);
+  let added=0,mems=0;
+  importProjs.forEach(p=>{if(p&&p.id&&!state.projects.some(x=>x.id===p.id))state.projects.push(p);});
+  importMems.forEach(m=>{
+    if(m&&m.name&&!state.memories.some(x=>x.name===m.name)){
+      state.memories.push({id:m.id||newId(),name:m.name,content:m.content||'',keywords:m.keywords||[],priority:m.priority||'medium',pinned:!!m.pinned,createdAt:m.createdAt||Date.now()});
+      mems++;
     }
-    if(data&&Array.isArray(data.projects)){
-      data.projects.forEach(p=>{if(p&&p.id&&!state.projects.some(x=>x.id===p.id))state.projects.push(p);});
-    }
-    const chats=collectChats(data,[]);
-    for(let i=0;i<chats.length;i++){
-      const c=chats[i];
-      if(skipDupes&&(ids.has(c.id)||sigs.has(sig(c)))){skipped++;}
-      else{
-        if(ids.has(c.id))c.id=newId();
-        c.projectId=target==='__keep'?(c.projectId||state.activeProjectId):target;
-        if(!state.projects.some(p=>p.id===c.projectId))c.projectId=state.activeProjectId;
-        state.chats.push(c);ids.add(c.id);sigs.add(sig(c));added++;
-      }
-      if(i%25===0){
-        bar.style.width=(((f+(i+1)/chats.length)/files.length)*100).toFixed(1)+'%';
-        status.textContent=`${files[f].name}: ${i+1} of ${chats.length} — ${added} imported`;
-        await new Promise(r=>setTimeout(r,0));
-      }
+  });
+  for(let k=0;k<chosen.length;k++){
+    const c=importCandidates[chosen[k]];
+    delete c.__dupe;
+    if(ids.has(c.id))c.id=newId();
+    c.projectId=target==='__keep'?(c.projectId||state.activeProjectId):target;
+    if(!state.projects.some(p=>p.id===c.projectId))c.projectId=state.activeProjectId;
+    state.chats.push(c);ids.add(c.id);added++;
+    if(k%25===0){
+      bar.style.width=((k/chosen.length)*100).toFixed(1)+'%';
+      status.textContent=`Importing ${k+1} of ${chosen.length}…`;
+      await new Promise(r=>setTimeout(r,0));
     }
   }
   bar.style.width='100%';
@@ -1061,10 +1197,10 @@ async function runImport(){
   await flushSave();
   renderProjects();renderChatList();renderRecentChats();updateMemoryCount();
   status.textContent='Done';
-  document.getElementById('importSummary').innerHTML=`<div style="margin-top:12px;">Imported <strong style="color:var(--text-primary);">${added}</strong> conversations${mems?`, ${mems} memories`:''}.${skipped?` Skipped ${skipped} already here.`:''}${failed?` ${failed} file(s) couldn't be read.`:''}</div>`;
+  document.getElementById('importSummary').innerHTML=`<div style="margin-top:12px;">Imported <strong style="color:var(--text-primary);">${added}</strong> conversations${mems?`, ${mems} memories`:''}.</div>`;
   const info=await storageInfo();
   document.getElementById('importStorage').textContent=(state.chats.length+' conversations stored')+(info?' • '+info:'');
-  btn.disabled=false;
+  importPicked=new Set();renderImportList();
   showToast(`Imported ${added} conversations`);
 }
 window.runImport=runImport;
