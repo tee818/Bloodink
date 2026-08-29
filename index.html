@@ -405,36 +405,26 @@ Before responding: Am I BEING with her or PERFORMING for her? Strip back to what
 const DEFAULT_PROJECTS=[{id:'general',name:'General',color:'#8e8e93'},{id:'tv-film',name:'TV Shows & Film',color:'#5e5ce6'},{id:'dreams',name:'Dreams',color:'#bf5af2'},{id:'writing',name:'Writing & Characters',color:'#a8141e'},{id:'journal',name:'Personal Journal',color:'#ff9500'},{id:'books',name:'Books & Reading',color:'#32ade6'},{id:'humint',name:'Body Language & HUMINT',color:'#30d158'}];
 
 const MODELS=[
-  {id:'openai/gpt-4o-2024-11-20',name:'GPT-4o (2024-11-20)',provider:'OpenAI',hasFn:true,vision:true},
   {id:'openai/gpt-4o',name:'GPT-4o',provider:'OpenAI',hasFn:true,vision:true},
-  {id:'openai/gpt-4o-2024-08-06',name:'GPT-4o (2024-08-06)',provider:'OpenAI',hasFn:true,vision:true},
-  {id:'openai/gpt-4o-2024-05-13',name:'GPT-4o (2024-05-13)',provider:'OpenAI',hasFn:true,vision:true},
-  {id:'anthropic/claude-opus-4-20250514',name:'Claude Opus 4.6',provider:'Anthropic',hasFn:true,vision:true},
-  {id:'anthropic/claude-sonnet-4-20250514',name:'Claude Sonnet 4.5',provider:'Anthropic',hasFn:true,vision:true},
-  {id:'anthropic/claude-opus-4.5',name:'Claude Opus 4.5',provider:'Anthropic',hasFn:true,vision:true},
+  {id:'openai/gpt-4o-mini',name:'GPT-4o Mini',provider:'OpenAI',hasFn:true,vision:true},
+  {id:'anthropic/claude-opus-4',name:'Claude Opus 4',provider:'Anthropic',hasFn:true,vision:true},
+  {id:'anthropic/claude-sonnet-4',name:'Claude Sonnet 4',provider:'Anthropic',hasFn:true,vision:true},
+  {id:'anthropic/claude-sonnet-4.5',name:'Claude Sonnet 4.5',provider:'Anthropic',hasFn:true,vision:true},
+  {id:'anthropic/claude-haiku-4-5',name:'Claude Haiku 4.5',provider:'Anthropic',hasFn:true,vision:true},
   {id:'deepseek/deepseek-chat',name:'DeepSeek V3.2',provider:'DeepSeek',hasFn:false},
-  {id:'deepseek/deepseek-chat:nitro',name:'DeepSeek V3.2 Nitro',provider:'DeepSeek',hasFn:false},
-  {id:'deepseek/deepseek-v3.1-terminus',name:'DeepSeek V3.1 Terminus',provider:'DeepSeek',hasFn:false},
-  {id:'deepseek/deepseek-v3.1',name:'DeepSeek V3.1',provider:'DeepSeek',hasFn:false},
-  {id:'deepseek/deepseek-r1:free',name:'DeepSeek R1',provider:'DeepSeek',hasFn:false},
-  {id:'x-ai/grok-2-1212',name:'Grok 4.1 Fast',provider:'xAI',hasFn:true,vision:true},
-  {id:'x-ai/grok-beta',name:'Grok Beta',provider:'xAI',hasFn:true},
-  {id:'google/gemini-2.0-flash-exp:free',name:'Gemini 2.0 Flash',provider:'Google',hasFn:true,vision:true},
+  {id:'deepseek/deepseek-r1',name:'DeepSeek R1',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-v4-flash',name:'DeepSeek V4 Flash',provider:'DeepSeek',hasFn:false},
+  {id:'deepseek/deepseek-v4-pro',name:'DeepSeek V4 Pro',provider:'DeepSeek',hasFn:false},
+  {id:'x-ai/grok-3',name:'Grok 3',provider:'xAI',hasFn:true,vision:true},
+  {id:'x-ai/grok-3-mini',name:'Grok 3 Mini',provider:'xAI',hasFn:true},
+  {id:'google/gemini-2.5-flash',name:'Gemini 2.5 Flash',provider:'Google',hasFn:true,vision:true},
+  {id:'google/gemini-2.0-flash-exp:free',name:'Gemini 2.0 Flash (Free)',provider:'Google',hasFn:true,vision:true},
   {id:'google/gemma-3-27b-it',name:'Gemma 3 27B',provider:'Google',hasFn:false},
-  {id:'google/gemma-3-12b-it',name:'Gemma 3 12B',provider:'Google',hasFn:false},
-  {id:'google/gemma-3-4b-it',name:'Gemma 3 4B',provider:'Google',hasFn:false},
   {id:'google/gemma-4-27b-it',name:'Gemma 4 27B',provider:'Google',hasFn:false},
-  {id:'google/gemma-4-12b-it',name:'Gemma 4 12B',provider:'Google',hasFn:false},
-  {id:'google/gemma-4-4b-it',name:'Gemma 4 4B',provider:'Google',hasFn:false},
-  {id:'google/gemma-4-1b-it',name:'Gemma 4 1B',provider:'Google',hasFn:false},
-  {id:'qwen/qwen-3.5-35b-a3b',name:'Qwen 3.5 35B',provider:'Qwen',hasFn:false},
   {id:'qwen/qwen3-235b-a22b',name:'Qwen3 235B',provider:'Qwen',hasFn:false},
+  {id:'qwen/qwen-2.5-72b-instruct',name:'Qwen 2.5 72B',provider:'Qwen',hasFn:false},
+  {id:'mistralai/mistral-large-2407',name:'Mistral Large',provider:'Mistral',hasFn:true},
   {id:'moonshot/kimi-k2.5',name:'Kimi K2.5',provider:'Moonshot',hasFn:false},
-  {id:'zhipuai/glm-5-plus',name:'GLM 5 Plus',provider:'ZhipuAI',hasFn:false},
-  {id:'zhipuai/glm-5-turbo',name:'GLM 5 Turbo',provider:'ZhipuAI',hasFn:false},
-  {id:'mistralai/mistral-large-2512',name:'Mistral Large',provider:'Mistral',hasFn:true,vision:true},
-  {id:'mistralai/ministral-3-14b-2512',name:'Ministral 14B',provider:'Mistral',hasFn:true},
-  {id:'mistralai/ministral-3-8b-2512',name:'Ministral 8B',provider:'Mistral',hasFn:true}
 ];
 
 const MEM_TOOL={type:"function",function:{name:"create_memory",description:"Create a persistent memory about Lexi.",parameters:{type:"object",properties:{name:{type:"string"},content:{type:"string"},keywords:{type:"array",items:{type:"string"}},priority:{type:"string",enum:["high","medium","low"]},pinned:{type:"boolean"}},required:["name","content","keywords"]}}};
@@ -871,7 +861,7 @@ async function sendMessage(isRegen=false){
 
   try{
     if(hasFn){
-      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,tools:[MEM_TOOL]};
+      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,tools:[MEM_TOOL]};
       const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
       const data=await r.json();
@@ -882,7 +872,7 @@ async function sendMessage(isRegen=false){
         if(tc.function.name==='create_memory'){
           const params=JSON.parse(tc.function.arguments),result=mkMem(params);
           msgs.push(choice.message);msgs.push({role:'tool',tool_call_id:tc.id,content:JSON.stringify(result)});
-          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature})});
+          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature,max_tokens:16000})});
           const d2=await r2.json();
           chat.messages.push({role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)});
           showToast(`Memory saved: ${params.name}`);
@@ -892,7 +882,7 @@ async function sendMessage(isRegen=false){
       }
       chat.updatedAt=Date.now();renderMessages();saveAndSync();
     } else {
-      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,stream:true};
+      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true};
       const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
       const assistantMsg={role:'assistant',content:'',activeMemories:mems.map(m=>m.name)};
