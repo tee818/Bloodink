@@ -16,7 +16,7 @@
 html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;overflow:hidden;transition:background 0.3s,color 0.3s}
 .welcome-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0a0000 0%,#000000 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;z-index:1000;opacity:1;transition:opacity 0.4s;overflow:hidden}
 .welcome-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(168,20,30,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(168,20,30,0.1) 0%,transparent 50%);pointer-events:none}
-.welcome-screen.hidden{opacity:0;pointer-events:none}
+.welcome-screen.hidden{opacity:0;pointer-events:none;display:none}
 .web-pattern{position:absolute;inset:0;opacity:0.08;background-image:linear-gradient(90deg,rgba(168,20,30,0.2) 1px,transparent 1px),linear-gradient(180deg,rgba(168,20,30,0.2) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
 .rose-accent{position:absolute;top:80px;right:60px;width:50px;height:50px;opacity:0.25}
 .rose-accent svg{width:100%;height:100%;fill:var(--accent);filter:drop-shadow(0 0 15px rgba(168,20,30,0.5))}
@@ -264,8 +264,8 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="profile-section">
-      <label class="profile-pic" id="profilePic" title="Your photo"><input type="file" accept="image/*" onchange="uploadProfilePic(event)" style="display:none;"><span>L</span></label>
-      <label class="profile-pic" id="bloodinkPic" title="Bloodink's photo" style="margin-left:8px;"><input type="file" accept="image/*" onchange="uploadBloodinkPic(event)" style="display:none;"><span>B</span></label>
+      <label class="profile-pic" id="profilePic" title="Your photo" style="display:none;"><input type="file" accept="image/*" onchange="uploadProfilePic(event)" style="display:none;"><span>L</span></label>
+      <label class="profile-pic" id="bloodinkPic" title="Bloodink's photo" style="margin-left:8px;display:none;"><input type="file" accept="image/*" onchange="uploadBloodinkPic(event)" style="display:none;"><span>B</span></label>
       <div class="profile-info"><div class="profile-name">Bloodink</div><div class="profile-status" id="sidebarSyncStatus">Always present</div></div>
     </div>
     <button class="sidebar-btn" onclick="createNewChat();toggleSidebar()">+ New chat</button>
@@ -687,6 +687,8 @@ async function init(){
   });
   if(state.profilePicture)document.getElementById('profilePic').innerHTML=`<img src="${state.profilePicture}">`;
   if(state.bloodinkPicture)document.getElementById('bloodinkPic').innerHTML=`<img src="${state.bloodinkPicture}">`;
+  document.getElementById('profilePic').style.display='flex';
+  document.getElementById('bloodinkPic').style.display='flex';
   if(!state.isFirstLaunch)startApp();
   if(state.fbApiKey)initFirebase();
 }
