@@ -712,6 +712,7 @@ window.closeProjects=closeProjects;
 function uploadProfilePic(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{state.profilePicture=ev.target.result;document.getElementById('profilePic').innerHTML=`<img src="${state.profilePicture}">`;saveLocal();renderMessages();};r.readAsDataURL(f);}
 function uploadBloodinkPic(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{state.bloodinkPicture=ev.target.result;document.getElementById('bloodinkPic').innerHTML=`<img src="${state.bloodinkPicture}">`;saveLocal();renderMessages();};r.readAsDataURL(f);}
 window.uploadProfilePic=uploadProfilePic;
+window.uploadBloodinkPic=uploadBloodinkPic;
 
 function showHomepage(){document.getElementById('homepage').style.display='flex';document.getElementById('messagesContainer').style.display='none';document.getElementById('inputArea').style.display='none';document.getElementById('quickModelSwitch').innerHTML='';state.activeChatId=null;renderRecentChats();document.getElementById('homepageMemoryCount').textContent=state.memories.length;saveLocal();}
 window.showHomepage=showHomepage;
