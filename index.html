@@ -92,6 +92,12 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .message-actions{display:flex;gap:8px;margin-top:8px;max-width:800px}
 .message-action-btn{background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:4px 8px;transition:color 0.2s}
 .message-action-btn:hover{color:var(--accent)}
+.message.user .message-actions{justify-content:flex-start}
+.edit-box{width:100%;max-width:800px;min-height:120px;padding:14px 18px;border-radius:16px;border:1px solid var(--accent);background:var(--user-bubble);color:var(--text-primary);font:inherit;font-size:15px;line-height:1.6;resize:vertical;box-sizing:border-box}
+.edit-buttons{display:flex;gap:8px;margin-top:8px}
+.edit-buttons button{background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-primary);border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer}
+.edit-buttons button.primary{border-color:var(--accent);color:var(--accent)}
+.send-button.stopping{opacity:1}
 .message-image{max-width:400px;border-radius:8px;margin-top:8px;display:block}
 .msg-attachments{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;max-width:800px}
 .msg-doc-chip{display:flex;align-items:center;gap:6px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text-secondary)}
@@ -504,6 +510,7 @@ function renderTray(){
 function removeAttachment(i){pending.splice(i,1);renderTray();}
 window.removeAttachment=removeAttachment;
 function syncSendBtn(){
+  if(typeof generating!=='undefined'&&generating)return;
   const inp=document.getElementById('inputField');
   const busy=pending.some(a=>a.pending);
   document.getElementById('sendButton').disabled=busy||(!inp.value.trim()&&!pending.length);
@@ -744,7 +751,7 @@ function attachmentHtml(msg){
   return `<div class="msg-attachments">${docs.map(d=>`<div class="msg-doc-chip">📄 ${esc(d.name)}<span style="color:var(--text-muted);">${d.text?d.text.length.toLocaleString()+' chars':''}</span></div>`).join('')}</div>`+imgs.map(u=>`<img src="${u}" class="message-image">`).join('');
 }
 
-function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}</div>`).join('');c.scrollTop=c.scrollHeight;}
+function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}${msg.isSynthesis?'':`<div class="message-actions"><button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>${msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}</div>`}</div>`).join('');c.scrollTop=c.scrollHeight;}
 function updateStreamingMessage(idx,content,done){
   const el=document.getElementById(`msg-content-${idx}`);
   if(!el)return;
@@ -753,11 +760,33 @@ function updateStreamingMessage(idx,content,done){
   c.scrollTop=c.scrollHeight;
 }
 
-function editMsg(i){const chat=getChat(),msg=chat.messages[i];const n=prompt('Edit:',msg.content);if(n?.trim()&&n!==msg.content){const keep={images:msg.images,docs:msg.docs};chat.messages=chat.messages.slice(0,i);chat.messages.push({role:'user',content:n.trim(),images:keep.images,docs:keep.docs});chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);}}
+function editMsg(i){
+  if(generating){showToast('Stop the reply first');return;}
+  const chat=getChat(),msg=chat.messages[i];
+  const wrap=document.querySelector(`.message[data-index="${i}"]`);if(!wrap)return;
+  const contentEl=wrap.querySelector('.message-content'),actions=wrap.querySelector('.message-actions');
+  if(actions)actions.style.display='none';
+  const box=document.createElement('div');
+  box.innerHTML=`<textarea class="edit-box"></textarea><div class="edit-buttons"><button class="primary">Save &amp; send</button><button>Cancel</button></div>`;
+  const ta=box.querySelector('textarea');ta.value=msg.content||'';
+  contentEl.replaceWith(box);ta.focus();ta.style.height=Math.max(120,ta.scrollHeight+4)+'px';
+  const [saveBtn,cancelBtn]=box.querySelectorAll('button');
+  cancelBtn.onclick=()=>renderMessages();
+  saveBtn.onclick=()=>{
+    const n=ta.value.trim();
+    if(!n){showToast('Message is empty');return;}
+    const keep={images:msg.images,docs:msg.docs};
+    chat.messages=chat.messages.slice(0,i);
+    chat.messages.push({role:'user',content:n,images:keep.images,docs:keep.docs});
+    chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);
+  };
+}
 window.editMsg=editMsg;
 function regen(i){const chat=getChat();chat.messages=chat.messages.slice(0,i);chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);}
 window.regen=regen;
-function cpMsg(i){navigator.clipboard.writeText(getChat().messages[i].content);showToast('Copied');}
+function cpMsg(i){const text=String(getChat().messages[i].content||'');
+  const fallback=()=>{const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}t.remove();showToast(ok?'Copied':'Copy failed');};
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>showToast('Copied'),fallback);else fallback();}
 window.cpMsg=cpMsg;
 function togglePin(i){const chat=getChat(),msg=chat.messages[i];msg.pinned=!msg.pinned;renderMessages();saveLocal();showToast(msg.pinned?'Pinned':'Unpinned');}
 window.togglePin=togglePin;
@@ -1010,7 +1039,17 @@ function startBrowserFallback(){
 
 // ── SEND ──────────────────────────────────────────────────────────────────
 
+var generating=false,currentAbort=null;
+const SEND_ICON='<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+const STOP_ICON='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
+function setGenerating(on){generating=on;const b=document.getElementById('sendButton');
+  if(on){b.innerHTML=STOP_ICON;b.title='Stop';b.disabled=false;b.classList.add('stopping');b.onclick=stopGeneration;}
+  else{b.innerHTML=SEND_ICON;b.title='Send';b.classList.remove('stopping');b.onclick=()=>sendMessage();currentAbort=null;syncSendBtn();}}
+function stopGeneration(){if(currentAbort)currentAbort.abort();}
+window.stopGeneration=stopGeneration;
+
 async function sendMessage(isRegen=false){
+  if(generating)return;
   const inp=document.getElementById('inputField'),content=inp.value.trim();
   if(!content&&!pending.length&&!isRegen)return;
   if(pending.some(a=>a.pending)){showToast('Still reading attachments…');return;}
@@ -1041,10 +1080,12 @@ async function sendMessage(isRegen=false){
   if(mems.length)msgs.push({role:'system',content:`[MEMORIES]\n\n${mems.map(m=>`## ${m.name}\n${m.content}`).join('\n\n---\n\n')}`});
   msgs.push(...smartCtx(chat.messages,memProbe,mems).map(m=>toApiMessage(m,vision)));
 
+  currentAbort=new AbortController();const signal=currentAbort.signal;let streamMsg=null;
+  setGenerating(true);
   try{
     if(hasFn){
       const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,tools:[MEM_TOOL]};
-      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body),signal});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
       const data=await r.json();
       if(!data.choices?.[0])throw new Error('Invalid response');
@@ -1054,7 +1095,7 @@ async function sendMessage(isRegen=false){
         if(tc.function.name==='create_memory'){
           const params=JSON.parse(tc.function.arguments),result=mkMem(params);
           msgs.push(choice.message);msgs.push({role:'tool',tool_call_id:tc.id,content:JSON.stringify(result)});
-          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature,max_tokens:16000})});
+          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature,max_tokens:16000}),signal});
           const d2=await r2.json();
           chat.messages.push({role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)});
           showToast(`Memory saved: ${params.name}`);
@@ -1065,9 +1106,9 @@ async function sendMessage(isRegen=false){
       chat.updatedAt=Date.now();renderMessages();saveAndSync();
     } else {
       const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true};
-      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body)});
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body),signal});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
-      const assistantMsg={role:'assistant',content:'',activeMemories:mems.map(m=>m.name)};
+      const assistantMsg={role:'assistant',content:'',activeMemories:mems.map(m=>m.name)};streamMsg=assistantMsg;
       chat.messages.push(assistantMsg);
       const msgIdx=chat.messages.length-1;
       renderMessages();
@@ -1101,11 +1142,20 @@ async function sendMessage(isRegen=false){
     }
     if(chat.messages.filter(m=>m.role==='user').length===1&&chat.title==='New conversation')setTimeout(()=>autoName(chat),1000);
   }catch(err){
-    showToast('Error: '+err.message,10000);console.error('Bloodink send error:',err);
-    if(!isRegen)chat.messages.pop();
-    renderMessages();
+    if(err.name==='AbortError'){
+      const idx=streamMsg?chat.messages.indexOf(streamMsg):-1;
+      if(idx>-1&&!streamMsg.content.trim())chat.messages.splice(idx,1);
+      chat.updatedAt=Date.now();renderMessages();saveAndSync();
+      showToast(streamMsg&&streamMsg.content.trim()?'Stopped — partial reply kept':'Stopped');
+    }else{
+      showToast('Error: '+err.message,10000);console.error('Bloodink send error:',err);
+      const idx=streamMsg?chat.messages.indexOf(streamMsg):-1;
+      if(idx>-1)chat.messages.splice(idx,1);
+      if(!isRegen)chat.messages.pop();
+      renderMessages();
+    }
   }
-  syncSendBtn();
+  setGenerating(false);
 }
 window.sendMessage=sendMessage;
 
