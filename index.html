@@ -458,7 +458,7 @@ const MODELS=[
   {id:'anthropic/claude-opus-4',name:'Claude Opus 4',provider:'Anthropic',hasFn:true,vision:true},
   {id:'anthropic/claude-sonnet-4',name:'Claude Sonnet 4',provider:'Anthropic',hasFn:true,vision:true},
   {id:'anthropic/claude-sonnet-4.5',name:'Claude Sonnet 4.5',provider:'Anthropic',hasFn:true,vision:true},
-  {id:'anthropic/claude-haiku-4-5',name:'Claude Haiku 4.5',provider:'Anthropic',hasFn:true,vision:true},
+  {id:'anthropic/claude-haiku-4.5',name:'Claude Haiku 4.5',provider:'Anthropic',hasFn:true,vision:true},
   {id:'deepseek/deepseek-chat',name:'DeepSeek V3.2',provider:'DeepSeek',hasFn:false},
   {id:'deepseek/deepseek-r1',name:'DeepSeek R1',provider:'DeepSeek',hasFn:false},
   {id:'deepseek/deepseek-v4-flash',name:'DeepSeek V4 Flash',provider:'DeepSeek',hasFn:false},
@@ -471,11 +471,11 @@ const MODELS=[
   {id:'google/gemini-2.5-flash',name:'Gemini 2.5 Flash',provider:'Google',hasFn:true,vision:true},
   {id:'google/gemini-2.0-flash-exp:free',name:'Gemini 2.0 Flash (Free)',provider:'Google',hasFn:true,vision:true},
   {id:'google/gemma-3-27b-it',name:'Gemma 3 27B',provider:'Google',hasFn:false},
-  {id:'google/gemma-4-27b-it',name:'Gemma 4 27B',provider:'Google',hasFn:false},
+  {id:'google/gemma-4-31b-it',name:'Gemma 4 31B',provider:'Google',hasFn:false},
   {id:'qwen/qwen3-235b-a22b',name:'Qwen3 235B',provider:'Qwen',hasFn:false},
   {id:'qwen/qwen-2.5-72b-instruct',name:'Qwen 2.5 72B',provider:'Qwen',hasFn:false},
   {id:'mistralai/mistral-large-2407',name:'Mistral Large',provider:'Mistral',hasFn:true},
-  {id:'moonshot/kimi-k2.5',name:'Kimi K2.5',provider:'Moonshot',hasFn:false},
+  {id:'moonshotai/kimi-k2.5',name:'Kimi K2.5',provider:'Moonshot',hasFn:false},
 ];
 
 const MEM_TOOL={type:"function",function:{name:"create_memory",description:"Create a persistent memory about Lexi.",parameters:{type:"object",properties:{name:{type:"string"},content:{type:"string"},keywords:{type:"array",items:{type:"string"}},priority:{type:"string",enum:["high","medium","low"]},pinned:{type:"boolean"}},required:["name","content","keywords"]}}};
@@ -1086,11 +1086,13 @@ async function sendMessage(isRegen=false){
           if(data==='[DONE]')continue;
           try{
             const parsed=JSON.parse(data);
+            if(parsed.error)throw new Error(parsed.error.message||'Model error');
             const delta=parsed.choices?.[0]?.delta?.content;
             if(delta){assistantMsg.content+=delta;updateStreamingMessage(msgIdx,assistantMsg.content,false);}
-          }catch(e){}
+          }catch(e){if(e instanceof SyntaxError)continue;chat.messages.splice(msgIdx,1);throw e;}
         }
       }
+      if(!assistantMsg.content.trim()){chat.messages.splice(msgIdx,1);throw new Error((model?.name||chat.model)+' sent back an empty reply');}
       updateStreamingMessage(msgIdx,assistantMsg.content,true);
       chat.updatedAt=Date.now();
       saveAndSync();
@@ -1099,7 +1101,7 @@ async function sendMessage(isRegen=false){
     }
     if(chat.messages.filter(m=>m.role==='user').length===1&&chat.title==='New conversation')setTimeout(()=>autoName(chat),1000);
   }catch(err){
-    showToast('Error: '+err.message);
+    showToast('Error: '+err.message,10000);console.error('Bloodink send error:',err);
     if(!isRegen)chat.messages.pop();
     renderMessages();
   }
@@ -1433,7 +1435,7 @@ async function storageInfo(){
   catch(_){return '';}
 }
 function esc(text){const d=document.createElement('div');d.textContent=text==null?'':String(text);return d.innerHTML;}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),3000);}
+function showToast(msg,ms=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('visible');clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove('visible'),ms);}
 window.showToast=showToast;
 
 let curMemId=null;
