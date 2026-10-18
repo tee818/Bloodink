@@ -95,6 +95,19 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .message.user .message-actions{justify-content:flex-start}
 .edit-box{width:100%;max-width:800px;min-height:120px;padding:14px 18px;border-radius:16px;border:1px solid var(--accent);background:var(--user-bubble);color:var(--text-primary);font:inherit;font-size:15px;line-height:1.6;resize:vertical;box-sizing:border-box}
 .edit-buttons{display:flex;gap:8px;margin-top:8px}
+.version-nav{display:inline-flex;align-items:center;gap:2px;color:var(--text-muted);font-size:12px}
+.version-nav button{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:2px 8px;line-height:1}
+.version-nav button:hover:not(:disabled){color:var(--accent)}
+.version-nav button:disabled{opacity:0.3;cursor:default}
+.msg-model-tag{margin-left:10px;font-size:11px;font-weight:400;color:var(--text-muted)}
+.compare-content{max-width:1200px}
+.compare-picks{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow-y:auto;padding:2px}
+.compare-pick{background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-secondary);border-radius:14px;padding:5px 11px;font-size:12px;cursor:pointer}
+.compare-pick.on{border-color:var(--accent);color:var(--text-primary);background:var(--user-bubble)}
+.compare-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:16px}
+.compare-card{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--ai-bubble);display:flex;flex-direction:column;min-width:0}
+.compare-card .cc-head{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px}
+.compare-card .cc-body{white-space:pre-wrap;font-size:14px;line-height:1.6;flex:1;max-height:55vh;overflow-y:auto;word-wrap:break-word}
 .edit-buttons button{background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-primary);border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer}
 .edit-buttons button.primary{border-color:var(--accent);color:var(--accent)}
 .send-button.stopping{opacity:1}
@@ -221,6 +234,7 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="logo" onclick="showHomepage()">Bloodink</div>
       <select class="theme-toggle" id="quickModelSwitch" onchange="switchModel(this.value)" style="max-width:150px;font-size:11px;padding:4px 8px;"></select>
+      <button class="theme-toggle" onclick="openCompare()" title="Send one message to several models" style="font-size:11px;padding:4px 10px;">Compare</button>
     </div>
     <div class="header-right">
       <div class="sync-status" id="syncStatus">Not connected</div>
@@ -292,6 +306,16 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   </div>
 </div>
 
+<div class="modal" id="compareModal">
+  <div class="modal-content compare-content">
+    <div class="modal-header">Compare models</div>
+    <div class="form-group"><label class="form-label">Message (uses this chat's history, system prompt and memories)</label><textarea class="form-input" id="compareInput" rows="4" style="resize:vertical;"></textarea></div>
+    <label class="form-label">Models — pick up to 3</label>
+    <div class="compare-picks" id="comparePicks"></div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeCompare()">Close</button><button class="btn-primary" onclick="runCompare()">Send to all</button></div>
+    <div class="compare-results" id="compareResults"></div>
+  </div>
+</div>
 <div class="modal" id="settingsModal">
   <div class="modal-content">
     <div class="modal-header">Settings</div>
@@ -759,7 +783,7 @@ function attachmentHtml(msg){
   return `<div class="msg-attachments">${docs.map(d=>`<div class="msg-doc-chip">📄 ${esc(d.name)}<span style="color:var(--text-muted);">${d.text?d.text.length.toLocaleString()+' chars':''}</span></div>`).join('')}</div>`+imgs.map(u=>`<img src="${u}" class="message-image">`).join('');
 }
 
-function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}${msg.isSynthesis?'':`<div class="message-actions"><button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>${msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}</div>`}</div>`).join('');c.scrollTop=c.scrollHeight;}
+function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.model&&msg.role==='assistant'?`<span class="msg-model-tag">${esc((MODELS.find(x=>x.id===msg.model)||{}).name||msg.model)}</span>`:''}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}${msg.isSynthesis?'':`<div class="message-actions">${versionNav(msg,i)}<button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>${msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}${msg.role==='assistant'&&i===chat.messages.length-1?`<button class="message-action-btn" onclick="regen(${i})">Regenerate</button>`:''}</div>`}</div>`).join('');c.scrollTop=c.scrollHeight;}
 function updateStreamingMessage(idx,content,done){
   const el=document.getElementById(`msg-content-${idx}`);
   if(!el)return;
@@ -790,7 +814,30 @@ function editMsg(i){
   };
 }
 window.editMsg=editMsg;
-function regen(i){const chat=getChat();chat.messages=chat.messages.slice(0,i);chat.updatedAt=Date.now();renderMessages();saveLocal();sendMessage(true);}
+function versionNav(msg,i){
+  if(msg.role!=='assistant'||!msg.versions||msg.versions.length<2)return '';
+  const k=msg.vIdx??msg.versions.length-1,n=msg.versions.length;
+  return `<span class="version-nav"><button onclick="showVersion(${i},-1)" ${k===0?'disabled':''} aria-label="Previous version">‹</button>${k+1} / ${n}<button onclick="showVersion(${i},1)" ${k===n-1?'disabled':''} aria-label="Next version">›</button></span>`;
+}
+function showVersion(i,dir){
+  const m=getChat()?.messages[i];if(!m?.versions)return;
+  const k=(m.vIdx??m.versions.length-1)+dir;if(k<0||k>=m.versions.length)return;
+  m.vIdx=k;m.content=m.versions[k];getChat().updatedAt=Date.now();renderMessages();saveAndSync();
+}
+window.showVersion=showVersion;
+async function regen(i){
+  if(generating){showToast('Stop the reply first');return;}
+  const chat=getChat(),old=chat.messages[i];
+  const prior=old&&old.role==='assistant'?(old.versions?.length?old.versions.slice():[old.content]):null;
+  chat.messages=chat.messages.slice(0,i);chat.updatedAt=Date.now();renderMessages();saveLocal();
+  const before=chat.messages.length;
+  await sendMessage(true);
+  const added=chat.messages.length>before?chat.messages[chat.messages.length-1]:null;
+  if(added&&added.role==='assistant'){
+    if(prior){added.versions=[...prior,added.content];added.vIdx=added.versions.length-1;}
+  }else if(old){chat.messages.push(old);}   // regenerate failed or was stopped empty: bring the old reply back
+  chat.updatedAt=Date.now();renderMessages();saveAndSync();
+}
 window.regen=regen;
 function cpMsg(i){const text=String(getChat().messages[i].content||'');
   const fallback=()=>{const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}t.remove();showToast(ok?'Copied':'Copy failed');};
@@ -1126,6 +1173,98 @@ function startBrowserFallback(){
   setVoiceUI('recording');
   startBrowser();
 }
+
+// ── COMPARE ───────────────────────────────────────────────────────────────
+let comparePicks=[],compareAborts=[],compareOut=[],compareText='',compareMems=[];
+try{comparePicks=JSON.parse(localStorage.getItem('bl_comparePicks')||'[]').filter(id=>MODELS.some(m=>m.id===id)).slice(0,3);}catch(e){comparePicks=[];}
+function renderComparePicks(){
+  document.getElementById('comparePicks').innerHTML=MODELS.map(m=>`<button class="compare-pick ${comparePicks.includes(m.id)?'on':''}" onclick="toggleComparePick('${m.id}')">${esc(m.name)}</button>`).join('');
+}
+function toggleComparePick(id){
+  if(comparePicks.includes(id))comparePicks=comparePicks.filter(x=>x!==id);
+  else{if(comparePicks.length>=3){showToast('Up to 3 models at once');return;}comparePicks.push(id);}
+  try{localStorage.setItem('bl_comparePicks',JSON.stringify(comparePicks));}catch(e){}
+  renderComparePicks();
+}
+window.toggleComparePick=toggleComparePick;
+function openCompare(){
+  if(!getChat()){showToast('Open a chat first');return;}
+  const inp=document.getElementById('inputField');
+  const ci=document.getElementById('compareInput');
+  if(inp.value.trim())ci.value=inp.value.trim();
+  renderComparePicks();
+  document.getElementById('compareModal').classList.add('visible');
+}
+window.openCompare=openCompare;
+function closeCompare(){compareAborts.forEach(a=>a.abort());compareAborts=[];document.getElementById('compareModal').classList.remove('visible');}
+window.closeCompare=closeCompare;
+function runCompare(){
+  const chat=getChat();if(!chat)return;
+  const text=document.getElementById('compareInput').value.trim();
+  if(!text){showToast('Write a message first');return;}
+  if(!state.apiKey){showToast('Add API key in Settings');return;}
+  if(!comparePicks.length){showToast('Pick at least one model');return;}
+  compareAborts.forEach(a=>a.abort());compareAborts=[];
+  const mems=getMemories(text);
+  const temp=[...chat.messages,{role:'user',content:text}];
+  compareText=text;compareMems=mems.map(m=>m.name);
+  compareOut=comparePicks.map(id=>({id,text:'',done:false}));
+  document.getElementById('compareResults').innerHTML=comparePicks.map((id,k)=>`<div class="compare-card"><div class="cc-head">${esc((MODELS.find(m=>m.id===id)||{}).name||id)}</div><div class="cc-body" id="cc-body-${k}"><span class="streaming-cursor"></span></div><div class="message-actions"><button class="message-action-btn" onclick="useCompare(${k})">Use this</button><button class="message-action-btn" onclick="copyCompare(${k})">Copy</button></div></div>`).join('');
+  comparePicks.forEach((id,k)=>streamCompare(id,k,temp,text,mems));
+}
+window.runCompare=runCompare;
+async function streamCompare(id,k,temp,probe,mems){
+  const model=MODELS.find(m=>m.id===id),vision=model?.vision||false;
+  const msgs=[{role:'system',content:state.systemPrompt}];
+  if(mems.length)msgs.push({role:'system',content:`[MEMORIES]\n\n${mems.map(m=>`## ${m.name}\n${m.content}`).join('\n\n---\n\n')}`});
+  msgs.push(...smartCtx(temp,probe,mems).map(m=>toApiMessage(m,vision)));
+  const ac=new AbortController();compareAborts.push(ac);
+  const out=compareOut[k];
+  const paint=done=>{const el=document.getElementById('cc-body-'+k);if(el&&compareOut[k]===out)el.innerHTML=md(out.text)+(done?'':'<span class="streaming-cursor"></span>');};
+  try{
+    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:id,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true}),signal:ac.signal});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
+    const reader=r.body.getReader(),decoder=new TextDecoder();let buffer='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');buffer=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: '))continue;const data=line.slice(6);if(data==='[DONE]')continue;
+        let parsed;try{parsed=JSON.parse(data);}catch(e){continue;}
+        if(parsed.error)throw new Error(parsed.error.message||'Model error');
+        const delta=parsed.choices?.[0]?.delta?.content;
+        if(delta){out.text+=delta;paint(false);}
+      }
+    }
+    out.done=true;
+    if(!out.text.trim())throw new Error('Empty reply');
+    paint(true);
+  }catch(e){
+    out.done=true;
+    const el=document.getElementById('cc-body-'+k);
+    if(e.name==='AbortError'){paint(true);return;}
+    if(el&&compareOut[k]===out)el.innerHTML=(out.text?md(out.text)+'\n\n':'')+`<span style="color:var(--accent)">Error: ${esc(e.message)}</span>`;
+  }
+}
+function useCompare(k){
+  const out=compareOut[k],chat=getChat();
+  if(!out||!chat)return;
+  if(!out.text.trim()){showToast('Nothing to use yet');return;}
+  if(!out.done){showToast('Still writing — wait or stop it first');return;}
+  chat.messages.push({role:'user',content:compareText});
+  chat.messages.push({role:'assistant',content:out.text,activeMemories:compareMems,model:out.id});
+  chat.updatedAt=Date.now();
+  const inp=document.getElementById('inputField');if(inp.value.trim()===compareText)inp.value='';
+  closeCompare();renderMessages();saveAndSync();syncSendBtn();
+  bgMem(chat.messages).catch(e=>console.error(e));
+  showToast('Added to chat');
+}
+window.useCompare=useCompare;
+function copyCompare(k){const t=compareOut[k]?.text||'';if(!t)return;
+  const fallback=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(e){}a.remove();showToast('Copied');};
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(()=>showToast('Copied'),fallback);else fallback();}
+window.copyCompare=copyCompare;
 
 // ── SEND ──────────────────────────────────────────────────────────────────
 
