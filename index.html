@@ -677,6 +677,8 @@ function listenRealtime(){
 function mergeCloud(cloud){
   const cc=cloud.chats||[],cm=cloud.memories||[],cp=cloud.projects||DEFAULT_PROJECTS;
   let changed=false;
+  const av=cloud.avatars;
+  if(av&&(av.at||0)>(state.avatarsAt||0)){state.profilePicture=av.profilePicture;state.bloodinkPicture=av.bloodinkPicture;state.avatarsAt=av.at;renderAvatars();saveLocal();if(state.activeChatId)renderMessages();}
   const merged=[...state.chats];
   cc.forEach(c=>{const i=merged.findIndex(x=>x.id===c.id);if(i===-1){merged.push(c);changed=true;}else if((c.updatedAt||0)>(merged[i].updatedAt||0)||c.messages.length>merged[i].messages.length){merged[i]=c;changed=true;}});
   const mm=[...state.memories];
@@ -690,7 +692,7 @@ const keep=chat.messages.filter(m=>m.pinned||m.isSynthesis);const recent=chat.me
 async function push(){
   if(!db||!state.fbSyncKey)return;
   const chatsToSync=compressChatsForSync(state.chats);
-  const payload={chats:chatsToSync,memories:state.memories,projects:state.projects,updatedAt:Date.now()};
+  const payload={chats:chatsToSync,memories:state.memories,projects:state.projects,avatars:{profilePicture:state.profilePicture||null,bloodinkPicture:state.bloodinkPicture||null,at:state.avatarsAt||0},updatedAt:Date.now()};
   const size=JSON.stringify(payload).length;
   if(size>900000){setSyncStatus('Too big — export locally','error');console.warn('Push skipped — '+Math.round(size/1024)+'KB still exceeds limit after compression');return;}
   syncing=true;setSyncStatus('Saving...','syncing');
@@ -727,8 +729,8 @@ async function init(){
     }
     renderTray();
   });
-  if(state.profilePicture)document.getElementById('profilePic').innerHTML=`<img src="${state.profilePicture}">`;
-  if(state.bloodinkPicture)document.getElementById('bloodinkPic').innerHTML=`<img src="${state.bloodinkPicture}">`;
+  for(const k of ['profilePicture','bloodinkPicture']){if(state[k]&&state[k].length>120000){state[k]=await avatarCrop(state[k]);saveLocal();}}
+  renderAvatars();
   document.getElementById('profilePic').style.display='flex';
   document.getElementById('bloodinkPic').style.display='flex';
   if(!state.isFirstLaunch)startApp();
@@ -751,8 +753,39 @@ function createProject(){const n=prompt('Project name:');if(!n?.trim())return;co
 window.createProject=createProject;
 function closeProjects(){document.getElementById('projectsModal').classList.remove('visible');}
 window.closeProjects=closeProjects;
-function uploadProfilePic(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{state.profilePicture=ev.target.result;document.getElementById('profilePic').innerHTML=`<img src="${state.profilePicture}">`;saveLocal();renderMessages();};r.readAsDataURL(f);}
-function uploadBloodinkPic(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{state.bloodinkPicture=ev.target.result;document.getElementById('bloodinkPic').innerHTML=`<img src="${state.bloodinkPicture}">`;saveLocal();renderMessages();};r.readAsDataURL(f);}
+// Avatars: cropped to a small square so they fit in storage and sync (a full phone photo
+// used to overflow localStorage, which silently stopped ALL settings from saving).
+function avatarCrop(dataUrl,size=256){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const side=Math.min(img.width,img.height),sx=(img.width-side)/2,sy=(img.height-side)/2;
+      const c=document.createElement('canvas');c.width=c.height=size;
+      c.getContext('2d').drawImage(img,sx,sy,side,side,0,0,size,size);
+      res(c.toDataURL('image/jpeg',0.85));
+    };
+    img.onerror=()=>res(null);
+    img.src=dataUrl;
+  });
+}
+function renderAvatars(){
+  [['profilePic','profilePicture','L','uploadProfilePic'],['bloodinkPic','bloodinkPicture','B','uploadBloodinkPic']].forEach(([id,key,letter,fn])=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=`<input type="file" accept="image/*" onchange="${fn}(event)" style="display:none;">`+(state[key]?`<img src="${state[key]}" alt="">`:`<span>${letter}</span>`);
+  });
+}
+async function setAvatar(e,key){
+  const f=e.target.files&&e.target.files[0];e.target.value='';
+  if(!f)return;
+  const raw=await readAsDataURL(f).catch(()=>null);
+  const small=raw&&await avatarCrop(raw);
+  if(!small){showToast("Couldn't read that image — try a JPG or PNG",6000);return;}
+  state[key]=small;state.avatarsAt=Date.now();
+  renderAvatars();saveAndSync();renderMessages();
+  showToast('Photo saved ✓');
+}
+function uploadProfilePic(e){setAvatar(e,'profilePicture');}
+function uploadBloodinkPic(e){setAvatar(e,'bloodinkPicture');}
 window.uploadProfilePic=uploadProfilePic;
 window.uploadBloodinkPic=uploadBloodinkPic;
 
@@ -1665,7 +1698,7 @@ window.toggleSidebar=toggleSidebar;
 // Settings stay in localStorage; chats/memories/projects live in IndexedDB,
 // which has no 5MB cap — room for tens of thousands of conversations.
 const DB_NAME='bloodink',DB_STORE='kv',LS_KEY='bloodink_v4',LS_SETTINGS='bloodink_v4_settings';
-const SETTING_KEYS=['apiKey','groqKey','fbApiKey','fbProjectId','fbAppId','fbSyncKey','systemPrompt','model','theme','maxMemories','temperature','repetitionPenalty','ctxSize','recentCtx','synthFreq','activeProjectId','activeChatId','isFirstLaunch','profilePicture','bloodinkPicture'];
+const SETTING_KEYS=['apiKey','groqKey','fbApiKey','fbProjectId','fbAppId','fbSyncKey','systemPrompt','model','theme','maxMemories','temperature','repetitionPenalty','ctxSize','recentCtx','synthFreq','activeProjectId','activeChatId','isFirstLaunch','profilePicture','bloodinkPicture','avatarsAt'];
 let storageReady=false,saveTimer=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(DB_STORE))r.result.createObjectStore(DB_STORE);};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
