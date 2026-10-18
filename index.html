@@ -105,6 +105,7 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .voice-recording{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid var(--accent);padding:16px 24px;border-radius:24px;display:none;align-items:center;gap:12px;z-index:50;box-shadow:0 4px 20px var(--shadow);min-width:280px}
 .voice-recording.active{display:flex}
+.voice-recording{max-width:calc(100vw - 32px);box-sizing:border-box;flex-wrap:wrap;justify-content:center}
 .voice-wave{flex:1;height:40px;display:flex;align-items:center;gap:2px}
 .voice-bar{flex:1;background:var(--accent);border-radius:2px;animation:wave 0.5s ease-in-out infinite alternate}
 .voice-bar:nth-child(1){animation-delay:0s}.voice-bar:nth-child(2){animation-delay:0.1s}.voice-bar:nth-child(3){animation-delay:0.2s}.voice-bar:nth-child(4){animation-delay:0.3s}.voice-bar:nth-child(5){animation-delay:0.4s}
@@ -250,7 +251,7 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   <div class="voice-recording" id="voiceRecording">
     <div class="voice-wave"><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div><div class="voice-bar"></div></div>
     <div class="voice-label" id="voiceLabel">Listening...</div>
-    <button class="voice-done-btn" id="voiceDoneBtn" onclick="stopVoice()">✓ Done</button>
+    <button class="voice-done-btn" id="voiceDoneBtn" onclick="stopVoice()">✓ Done</button><button class="voice-done-btn" id="voiceRetryBtn" onclick="retryVoice()" style="display:none">Retry</button><button class="voice-done-btn" id="voiceKeepBtn" onclick="keepVoicePartial()" style="display:none">Use what worked</button>
   </div>
   <div class="input-area" id="inputArea" style="display:none;">
     <div class="attachment-tray" id="attachmentTray"></div>
@@ -959,7 +960,7 @@ async function stopVoice(){
   isRecording=false;
   document.getElementById('micButton').classList.remove('recording');
   setVoiceUI('processing');
-  if(recorder&&recorder.state==='recording'){recorder.stop();}
+  if(voiceSess){finishGroqRecording(voiceSess);}
   else if(recog){recog.stop();hideVoiceUI();}
   else{hideVoiceUI();}
 }
@@ -967,50 +968,132 @@ window.stopVoice=stopVoice;
 
 function hideVoiceUI(){
   document.getElementById('voiceRecording').classList.remove('active');
+  document.getElementById('voiceRetryBtn').style.display='none';
+  document.getElementById('voiceKeepBtn').style.display='none';
+  document.getElementById('voiceDoneBtn').style.display='';
   setVoiceUI('recording');
 }
 
-async function startGroq(){
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    const mimeType=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
-    recorder=new MediaRecorder(stream,mimeType?{mimeType}:{});
-    chunks=[];
-    recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
-    recorder.onstop=async()=>{
-      stream.getTracks().forEach(t=>t.stop());
-      if(chunks.length===0){showToast('No audio captured — try again');hideVoiceUI();return;}
-      const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
-      if(blob.size<1000){showToast('Recording too short — try again');hideVoiceUI();return;}
-      const ext=recorder.mimeType&&recorder.mimeType.includes('mp4')?'m4a':'webm';
-      const fd=new FormData();
-      fd.append('file',blob,`audio.${ext}`);
-      fd.append('model','whisper-large-v3');
-      try{
-        const r=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${state.groqKey}`},body:fd});
-        if(!r.ok){throw new Error(`Groq ${r.status}`);}
-        const d=await r.json();
-        if(d.text&&d.text.trim()){
-          const inp=document.getElementById('inputField');
-          inp.value=(inp.value?inp.value+' ':'')+d.text.trim();
-          inp.dispatchEvent(new Event('input'));
-          showToast('Transcription complete ✓');
-        }else{showToast('Nothing transcribed — try speaking closer to mic');}
-      }catch(err){
-        console.error('Groq error:',err);
-        showToast('Groq failed — falling back to browser voice');
-        startBrowserFallback();
-        return;
-      }
-      hideVoiceUI();
-    };
-    recorder.start(500);
-  }catch(e){
-    console.error('Mic error:',e);
-    showToast('Microphone access denied');
-    hideVoiceUI();
-  }
+// ── Groq voice: records in 45-second pieces, transcribes each as it goes,
+// retries failures, keeps the screen awake, and never throws audio away.
+const VOICE_SEG_MS=45000;
+let voiceSess=null,voiceFailedSess=null;
+function pickVoiceMime(){return ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';}
+async function grabWakeLock(vs){try{if('wakeLock' in navigator&&!vs.wake)vs.wake=await navigator.wakeLock.request('screen');vs.wake?.addEventListener?.('release',()=>{vs.wake=null;});}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&voiceSess&&!voiceSess.stopping)grabWakeLock(voiceSess);});
+function voiceTick(vs){
+  if(vs!==voiceSess||vs.stopping)return;
+  const sec=Math.floor((Date.now()-vs.started)/1000);
+  const t=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+  document.getElementById('voiceLabel').textContent='Listening · '+t+(vs.pending?' · saving…':'');
 }
+
+async function startGroq(){
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});}
+  catch(e){console.error('Mic error:',e);showToast('Microphone access denied',6000);isRecording=false;document.getElementById('micButton').classList.remove('recording');hideVoiceUI();return;}
+  const vs={stream,texts:[],failed:[],pending:0,idx:0,stopping:false,live:0,timer:null,clock:null,wake:null,started:Date.now(),lastErr:''};
+  voiceSess=vs;
+  grabWakeLock(vs);
+  stream.getAudioTracks().forEach(t=>t.onended=()=>{if(voiceSess===vs&&!vs.stopping){showToast('Microphone was interrupted — transcribing what was captured',6000);stopVoice();}});
+  vs.clock=setInterval(()=>voiceTick(vs),1000);
+  startVoiceSegment(vs);
+}
+
+function startVoiceSegment(vs){
+  const mime=pickVoiceMime();
+  let rec;
+  try{rec=new MediaRecorder(vs.stream,mime?{mimeType:mime,audioBitsPerSecond:32000}:{audioBitsPerSecond:32000});}
+  catch(e){rec=new MediaRecorder(vs.stream);}
+  const parts=[],idx=vs.idx++;
+  vs.live++;
+  rec.ondataavailable=e=>{if(e.data&&e.data.size>0)parts.push(e.data);};
+  rec.onstop=()=>{
+    vs.live--;
+    const type=rec.mimeType||mime||'audio/webm';
+    const blob=new Blob(parts,{type});
+    if(blob.size>1500)transcribeVoiceSegment(vs,blob,type,idx);
+    else maybeFinishVoice(vs);
+  };
+  vs.recorder=rec;
+  rec.start(1000);
+  clearTimeout(vs.timer);
+  vs.timer=setTimeout(()=>{
+    if(vs.stopping||rec.state!=='recording')return;
+    startVoiceSegment(vs);   // start the next piece first so nothing is missed
+    rec.stop();
+  },VOICE_SEG_MS);
+}
+
+async function transcribeVoiceSegment(vs,blob,type,idx){
+  vs.pending++;voiceTick(vs);
+  const ext=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
+  let err=null;
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      const fd=new FormData();
+      fd.append('file',blob,`voice-${idx}.${ext}`);
+      fd.append('model','whisper-large-v3');
+      const r=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${state.groqKey}`},body:fd});
+      if(!r.ok){let m='';try{const j=await r.json();m=j.error?.message||'';}catch(e){}const e=new Error(`Groq ${r.status}${m?' — '+m:''}`);e.status=r.status;throw e;}
+      const d=await r.json();
+      vs.texts[idx]=(d.text||'').trim();
+      err=null;break;
+    }catch(e){err=e;if(e.status===401||e.status===413)break;await new Promise(res=>setTimeout(res,2000*(attempt+1)));}
+  }
+  if(err){console.error('Voice piece failed:',err);vs.failed.push({blob,type,idx});vs.lastErr=err.message;}
+  vs.pending--;voiceTick(vs);
+  maybeFinishVoice(vs);
+}
+
+function finishGroqRecording(vs){
+  vs.stopping=true;
+  clearTimeout(vs.timer);clearInterval(vs.clock);
+  if(vs.recorder&&vs.recorder.state==='recording')vs.recorder.stop();
+  maybeFinishVoice(vs);
+}
+
+function maybeFinishVoice(vs){
+  if(!vs.stopping||vs.pending>0||vs.live>0)return;
+  vs.stream.getTracks().forEach(t=>t.stop());
+  try{vs.wake?.release();}catch(e){}
+  if(voiceSess===vs)voiceSess=null;
+  if(vs.failed.length){
+    voiceFailedSess=vs;
+    const total=vs.idx;
+    document.getElementById('voiceRecording').classList.add('active');
+    document.getElementById('voiceLabel').textContent=`${vs.failed.length} of ${total} part${total>1?'s':''} failed — audio kept`;
+    document.getElementById('voiceDoneBtn').style.display='none';
+    document.getElementById('voiceRetryBtn').style.display='';
+    document.getElementById('voiceKeepBtn').style.display=vs.texts.some(Boolean)?'':'none';
+    showToast('Voice error: '+vs.lastErr,10000);
+    return;
+  }
+  if(voiceFailedSess===vs)voiceFailedSess=null;
+  insertVoiceText(vs);
+  hideVoiceUI();
+}
+
+function insertVoiceText(vs){
+  const text=vs.texts.filter(Boolean).join(' ').trim();
+  if(!text){showToast('Nothing transcribed — try speaking closer to the mic',6000);return;}
+  const inp=document.getElementById('inputField');
+  inp.value=(inp.value?inp.value+' ':'')+text;
+  inp.dispatchEvent(new Event('input'));
+  showToast('Transcription complete ✓');
+}
+
+async function retryVoice(){
+  const vs=voiceFailedSess;if(!vs)return hideVoiceUI();
+  const again=vs.failed;vs.failed=[];
+  document.getElementById('voiceLabel').textContent='Retrying…';
+  document.getElementById('voiceRetryBtn').style.display='none';
+  document.getElementById('voiceKeepBtn').style.display='none';
+  await Promise.all(again.map(f=>transcribeVoiceSegment(vs,f.blob,f.type,f.idx)));
+}
+window.retryVoice=retryVoice;
+function keepVoicePartial(){const vs=voiceFailedSess;voiceFailedSess=null;if(vs)insertVoiceText(vs);hideVoiceUI();}
+window.keepVoicePartial=keepVoicePartial;
 
 function startBrowser(){
   if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){
