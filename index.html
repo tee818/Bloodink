@@ -100,6 +100,14 @@ html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);fon
 .version-nav button:hover:not(:disabled){color:var(--accent)}
 .version-nav button:disabled{opacity:0.3;cursor:default}
 .msg-model-tag{margin-left:10px;font-size:11px;font-weight:400;color:var(--text-muted)}
+.think-block{max-width:800px;margin:0 0 8px;border:1px dashed var(--border);border-radius:12px;background:var(--bg-tertiary);font-size:13px}
+.think-block summary{cursor:pointer;padding:8px 14px;color:var(--text-muted);list-style:none;user-select:none}
+.think-block summary::-webkit-details-marker{display:none}
+.think-block summary::before{content:'▸ ';color:var(--accent)}
+.think-block[open] summary::before{content:'▾ '}
+.think-body{padding:0 14px 12px;white-space:pre-wrap;line-height:1.55;color:var(--text-muted);max-height:50vh;overflow-y:auto}
+.think-live summary{color:var(--accent)}
+.think-note{display:block;margin-top:6px;color:var(--text-muted);font-size:12px;line-height:1.5}
 .compare-content{max-width:1200px}
 .compare-picks{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow-y:auto;padding:2px}
 .compare-pick{background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-secondary);border-radius:14px;padding:5px 11px;font-size:12px;cursor:pointer}
@@ -329,8 +337,9 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Sync Key <span style="color:var(--accent);">★ Same on both devices</span></label><input type="text" class="form-input sync-key-highlight" id="fbSyncKey" placeholder="e.g. lexi-bloodink-2025"><small style="color:var(--text-muted);font-size:12px;">Same passphrase on both devices.</small></div>
     </div>
     <div class="form-group"><label class="form-label">System Prompt</label><textarea class="form-textarea" id="systemPromptInput" style="min-height:150px;font-family:monospace;font-size:12px;"></textarea></div>
-    <div class="form-group"><label class="form-label">Model</label><select class="form-input" id="modelSelect"></select></div>
+    <div class="form-group"><label class="form-label">Model</label><select class="form-input" id="modelSelect" onchange="updateThinkNote()"></select></div>
     <div class="form-group"><label class="form-label">Temperature: <span id="tempValue">1.0</span></label><input type="range" class="form-input" id="temperatureInput" min="0" max="1.5" step="0.025" value="1.0" oninput="document.getElementById('tempValue').textContent=parseFloat(this.value).toFixed(3)"></div>
+    <div class="form-group"><label class="form-label">Thinking depth: <span id="thinkValue">Model default</span></label><input type="range" class="form-input" id="thinkInput" min="0" max="5" step="1" value="1" oninput="updateThinkNote()"><small class="think-note" id="thinkNote"></small></div>
     <div class="form-group"><label class="form-label">Repetition Penalty: <span id="repValue">1.0</span></label><input type="range" class="form-input" id="repetitionInput" min="1" max="2" step="0.05" value="1.0" oninput="document.getElementById('repValue').textContent=this.value"></div>
     <div class="form-group"><label class="form-label">Context Window — scored messages: <span id="ctxValue">20</span></label><input type="range" class="form-input" id="ctxInput" min="8" max="60" step="1" value="20" oninput="document.getElementById('ctxValue').textContent=this.value"><small style="color:var(--text-muted);font-size:12px;">Higher = more of the conversation in view. Use 40+ for deep writing sessions.</small></div>
     <div class="form-group"><label class="form-label">Always include last N messages: <span id="recentCtxValue">12</span></label><input type="range" class="form-input" id="recentCtxInput" min="4" max="30" step="1" value="12" oninput="document.getElementById('recentCtxValue').textContent=this.value"><small style="color:var(--text-muted);font-size:12px;">These are always included verbatim regardless of scoring.</small></div>
@@ -519,9 +528,124 @@ const MODELS=[
   {id:'meta/muse-spark-1.3',name:'Muse Spark 1.3',provider:'Meta',hasFn:false},
 ];
 
+// ── THINKING DEPTH ─────────────────────────────────────────────────────────
+// How long the model thinks before it writes. "Model default" sends nothing
+// extra, so replies behave exactly as before. Every other level asks OpenRouter
+// for that much reasoning and widens max_tokens by the same amount, so the
+// written reply always keeps its full 16,000-token room.
+// The thinking is shown under each reply (collapsed), kept on this device only,
+// never sent back to the model as context and never synced to Firebase.
+const REPLY_ROOM=16000;
+const THINK_LEVELS=[
+  {key:'off',label:'Off',budget:0},
+  {key:'default',label:'Model default',budget:0},
+  {key:'low',label:'Low',budget:4000},
+  {key:'medium',label:'Medium',budget:12000},
+  {key:'high',label:'High',budget:24000},
+  {key:'max',label:'Max',budget:48000},
+];
+const thinkLevelOf=k=>THINK_LEVELS.find(l=>l.key===k)||THINK_LEVELS[1];
+// Live model facts from OpenRouter: which models can think, how, and their output ceiling
+let orModels=null,orModelsLoading=null;
+function loadModelInfo(){
+  if(orModels)return Promise.resolve(orModels);
+  if(orModelsLoading)return orModelsLoading;
+  orModelsLoading=fetch('https://openrouter.ai/api/v1/models').then(r=>r.ok?r.json():Promise.reject(new Error('models '+r.status))).then(d=>{
+    const map={};
+    (d.data||[]).forEach(m=>{const sp=m.supported_parameters||[];map[m.id]={reasoning:m.reasoning||null,thinks:!!m.reasoning||sp.includes('reasoning')||sp.includes('include_reasoning'),maxOut:m.top_provider?.max_completion_tokens||null};});
+    orModels=map;orModelsLoading=null;updateThinkNote();return map;
+  }).catch(e=>{console.warn('Model info:',e);orModelsLoading=null;return null;});
+  return orModelsLoading;
+}
+async function thinkParams(modelId){
+  const lvl=thinkLevelOf(state.thinkLevel);
+  const base={max_tokens:REPLY_ROOM,reasoning:null,dropTemp:false};
+  if(lvl.key==='default')return base;
+  let info=null;
+  try{const map=await Promise.race([loadModelInfo(),new Promise(r=>setTimeout(()=>r(null),4000))]);info=map?.[modelId]||null;}catch(_){}
+  if(info&&!info.thinks)return base;                       // this model has no thinking to turn up or down
+  const r=info?.reasoning||{};
+  const efforts=Array.isArray(r.supported_efforts)?r.supported_efforts:[];
+  const RANK=['none','minimal','low','medium','high','xhigh','max'];
+  const pickEffort=want=>{if(!efforts.length)return want[0];const hit=want.find(e=>efforts.includes(e));if(hit)return hit;
+    const t=RANK.indexOf(want[0]);return efforts.slice().sort((a,b)=>Math.abs(RANK.indexOf(a)-t)-Math.abs(RANK.indexOf(b)-t))[0];};
+  if(lvl.key==='off'){
+    if(r.mandatory)return {...base,reasoning:{effort:pickEffort(['minimal','low'])}};
+    return {...base,reasoning:{effort:efforts.length?pickEffort(['none','minimal']):'none'}};
+  }
+  const cap=info?.maxOut||null;
+  const wanted={low:['low'],medium:['medium'],high:['high'],max:['max','xhigh','high']}[lvl.key];
+  const isClaude=/^anthropic\//.test(modelId);
+  if(!info)return {...base,reasoning:{effort:wanted[0]},dropTemp:isClaude}; // couldn't reach model list: ask, keep old ceiling
+  if(efforts.length&&!r.supports_max_tokens){
+    const mt=cap?Math.min(cap,REPLY_ROOM+lvl.budget):REPLY_ROOM+lvl.budget;
+    return {max_tokens:mt,reasoning:{effort:pickEffort(wanted)},dropTemp:isClaude};
+  }
+  // budget-style thinkers (Claude, Gemini, some Qwen): give an exact thinking budget
+  let budget=lvl.budget,mt=REPLY_ROOM+budget;
+  if(cap&&mt>cap){mt=cap;budget=Math.max(1024,Math.min(budget,cap-4000));}
+  return {max_tokens:mt,reasoning:{max_tokens:budget},dropTemp:isClaude};
+}
+// Builds the request body: same fields as always, plus thinking when it's turned on
+function withThinking(body,tp){
+  body.max_tokens=tp.max_tokens;
+  if(tp.reasoning)body.reasoning=tp.reasoning;
+  if(tp.dropTemp)delete body.temperature;                 // Claude only thinks at its own fixed temperature
+  return body;
+}
+// Pull reasoning text out of a streaming delta (OpenRouter sends it beside the content)
+function deltaThinking(delta){
+  if(!delta)return '';
+  if(typeof delta.reasoning==='string'&&delta.reasoning)return delta.reasoning;
+  if(typeof delta.reasoning_content==='string'&&delta.reasoning_content)return delta.reasoning_content;
+  if(Array.isArray(delta.reasoning_details))return delta.reasoning_details.map(x=>x.text||x.summary||'').join('');
+  return '';
+}
+function messageThinking(msg){
+  if(!msg)return '';
+  if(typeof msg.reasoning==='string'&&msg.reasoning)return msg.reasoning;
+  if(Array.isArray(msg.reasoning_details))return msg.reasoning_details.map(x=>x.text||x.summary||'').join('');
+  return '';
+}
+function thinkBlockHtml(text,live,id){
+  if(!text&&!live)return '';
+  const words=text?text.trim().split(/\s+/).length:0;
+  const label=live?(text?`Thinking… ${words.toLocaleString()} words`:'Thinking…'):`Thought · ${words.toLocaleString()} words`;
+  return `<details class="think-block${live?' think-live':''}"${id?` id="${id}"`:''}><summary>${label}</summary><div class="think-body">${esc(text||'')}</div></details>`;
+}
+function updateThinkNote(){
+  const inp=document.getElementById('thinkInput');if(!inp)return;
+  const lvl=THINK_LEVELS[parseInt(inp.value)]||THINK_LEVELS[1];
+  document.getElementById('thinkValue').textContent=lvl.label;
+  const id=document.getElementById('modelSelect')?.value||state.model;
+  const name=(MODELS.find(m=>m.id===id)||{}).name||id;
+  const info=orModels?.[id];
+  let note;
+  if(lvl.key==='default')note=`Sends nothing extra — ${name} thinks (or doesn't) the way it always has.`;
+  else if(orModels&&info&&!info.thinks)note=`${name} doesn't think before writing, so this dial won't reach it. Try a thinking model (Opus 5, GPT-5.5/5.6, Gemini, Inkling, Kimi K3…).`;
+  else if(lvl.key==='off')note=`${name} writes straight away without thinking first${info?.reasoning?.mandatory?' (this one always thinks a little — it gets the lightest setting)':''}.`;
+  else{
+    const effs=info?.reasoning?.supported_efforts||[],effortOnly=effs.length&&!info?.reasoning?.supports_max_tokens;
+    const want={low:'low',medium:'medium',high:'high',max:'max'}[lvl.key];
+    if(effortOnly){
+      const RANK=['none','minimal','low','medium','high','xhigh','max'];
+      const got=effs.includes(want)?want:(lvl.key==='max'&&effs.includes('xhigh')?'xhigh':effs.slice().sort((a,b)=>Math.abs(RANK.indexOf(a)-RANK.indexOf(want))-Math.abs(RANK.indexOf(b)-RANK.indexOf(want)))[0]);
+      note=`${name} thinks at its “${got}” effort before writing${got!==want?' (the deepest it offers)':''}; the reply keeps its full ${REPLY_ROOM.toLocaleString()}-token room.`;
+    }else{
+      note=`${name} thinks up to ~${lvl.budget.toLocaleString()} tokens before writing; the reply keeps its full ${REPLY_ROOM.toLocaleString()}-token room.`;
+      if(info?.maxOut&&REPLY_ROOM+lvl.budget>info.maxOut)note+=` (Its ceiling is ${info.maxOut.toLocaleString()} tokens, so thinking is trimmed to fit.)`;
+    }
+    if(/^anthropic\//.test(id))note+=' Claude only thinks at its own fixed temperature, so your temperature slider is skipped for Claude while this is on.';
+    note+=' Deeper thinking means a longer wait before words appear, and costs more.';
+  }
+  if(!orModels)note+=' (Checking model details…)';
+  document.getElementById('thinkNote').textContent=note;
+}
+window.updateThinkNote=updateThinkNote;
+
 const MEM_TOOL={type:"function",function:{name:"create_memory",description:"Create a persistent memory about Lexi.",parameters:{type:"object",properties:{name:{type:"string"},content:{type:"string"},keywords:{type:"array",items:{type:"string"}},priority:{type:"string",enum:["high","medium","low"]},pinned:{type:"boolean"}},required:["name","content","keywords"]}}};
 
-let state={apiKey:'',groqKey:'',fbApiKey:'',fbProjectId:'',fbAppId:'',fbSyncKey:'',systemPrompt:DEFAULT_SYSTEM_PROMPT,model:'openai/gpt-4o-2024-11-20',theme:'dark',maxMemories:3,temperature:1.0,repetitionPenalty:1.0,ctxSize:20,recentCtx:12,synthFreq:10,projects:DEFAULT_PROJECTS,activeProjectId:'general',chats:[],memories:[],activeChatId:null,isFirstLaunch:true,profilePicture:null,bloodinkPicture:null};
+let state={apiKey:'',groqKey:'',fbApiKey:'',fbProjectId:'',fbAppId:'',fbSyncKey:'',systemPrompt:DEFAULT_SYSTEM_PROMPT,model:'openai/gpt-4o-2024-11-20',theme:'dark',maxMemories:3,temperature:1.0,repetitionPenalty:1.0,ctxSize:20,recentCtx:12,synthFreq:10,thinkLevel:'default',projects:DEFAULT_PROJECTS,activeProjectId:'general',chats:[],memories:[],activeChatId:null,isFirstLaunch:true,profilePicture:null,bloodinkPicture:null};
 
 let db=null,unsub=null,syncing=false,recog=null,recorder=null,chunks=[],isRecording=false;
 
@@ -677,19 +801,27 @@ function listenRealtime(){
   setSyncStatus('Live ✓','synced');
 }
 
+function carryThinking(local,cloud){
+  try{const keep=new Map();(local.messages||[]).forEach(m=>{if(m.role==='assistant'&&m.thinking)keep.set(String(m.content||''),{t:m.thinking,ts:m.thinkings});});
+    if(!keep.size)return;
+    (cloud.messages||[]).forEach(m=>{if(m.role!=='assistant'||m.thinking)return;const k=keep.get(String(m.content||''));if(k){m.thinking=k.t;if(k.ts&&m.versions&&k.ts.length===m.versions.length)m.thinkings=k.ts;}});
+  }catch(e){console.warn('carryThinking:',e);}
+}
 function mergeCloud(cloud){
   const cc=cloud.chats||[],cm=cloud.memories||[],cp=cloud.projects||DEFAULT_PROJECTS;
   let changed=false;
   const av=cloud.avatars;
   if(av&&(av.at||0)>(state.avatarsAt||0)){state.profilePicture=av.profilePicture;state.bloodinkPicture=av.bloodinkPicture;state.avatarsAt=av.at;renderAvatars();saveLocal();if(state.activeChatId)renderMessages();}
   const merged=[...state.chats];
-  cc.forEach(c=>{const i=merged.findIndex(x=>x.id===c.id);if(i===-1){merged.push(c);changed=true;}else if((c.updatedAt||0)>(merged[i].updatedAt||0)||c.messages.length>merged[i].messages.length){merged[i]=c;changed=true;}});
+  cc.forEach(c=>{const i=merged.findIndex(x=>x.id===c.id);if(i===-1){merged.push(c);changed=true;}else if((c.updatedAt||0)>(merged[i].updatedAt||0)||c.messages.length>merged[i].messages.length){carryThinking(merged[i],c);merged[i]=c;changed=true;}});
   const mm=[...state.memories];
   cm.forEach(m=>{if(!mm.find(x=>x.id===m.id)){mm.push(m);changed=true;}});
   if(changed){state.chats=merged;state.memories=mm;state.projects=cp;saveLocal();renderChatList();renderRecentChats();updateMemoryCount();renderProjects();if(state.activeChatId)renderMessages();}
 }
 
-function compressChatsForSync(chats){return chats.map(chat=>{const raw=JSON.stringify(chat).length;if(raw<50000)return chat;// Chat is large — trim older messages, keep recent + pinned + syntheses
+// Thinking text is kept locally only: it's large and Firebase holds everything in one ~1MB document.
+const stripThinking=chat=>chat.messages.some(m=>m.thinking||m.thinkings||m._tp)?{...chat,messages:chat.messages.map(m=>{if(!m.thinking&&!m.thinkings&&!m._tp)return m;const{thinking,thinkings,_tp,...rest}=m;return rest;})}:chat;
+function compressChatsForSync(chats){return chats.map(stripThinking).map(chat=>{const raw=JSON.stringify(chat).length;if(raw<50000)return chat;// Chat is large — trim older messages, keep recent + pinned + syntheses
 const keep=chat.messages.filter(m=>m.pinned||m.isSynthesis);const recent=chat.messages.filter(m=>!m.pinned&&!m.isSynthesis).slice(-30);const trimmed=[...keep,...recent].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));return{...chat,messages:trimmed,_compressed:true};});}
 
 async function push(){
@@ -717,7 +849,7 @@ function setSyncStatus(text,cls){const el=document.getElementById('syncStatus');
 function saveAndSync(){saveLocal();if(db&&state.fbSyncKey)push();}
 
 async function init(){
-  await loadState();applyTheme();renderProjects();updateMemoryCount();populateModelSelect();
+  await loadState();applyTheme();renderProjects();updateMemoryCount();populateModelSelect();loadModelInfo();
   const inp=document.getElementById('inputField');
   inp.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';syncSendBtn();});
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(this.value.trim()||pending.length)sendMessage();}});
@@ -819,7 +951,25 @@ function attachmentHtml(msg){
   return `<div class="msg-attachments">${docs.map(d=>`<div class="msg-doc-chip">📄 ${esc(d.name)}<span style="color:var(--text-muted);">${d.text?d.text.length.toLocaleString()+' chars':''}</span></div>`).join('')}</div>`+imgs.map(u=>`<img src="${u}" class="message-image">`).join('');
 }
 
-function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.model&&msg.role==='assistant'?`<span class="msg-model-tag">${esc((MODELS.find(x=>x.id===msg.model)||{}).name||msg.model)}</span>`:''}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div><div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}${msg.isSynthesis?'':`<div class="message-actions">${versionNav(msg,i)}<button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>${msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}${msg.role==='assistant'&&i===chat.messages.length-1?`<button class="message-action-btn" onclick="regen(${i})">Regenerate</button>`:''}</div>`}</div>`).join('');c.scrollTop=c.scrollHeight;}
+function renderMessages(){const chat=getChat();if(!chat)return;const c=document.getElementById('messagesContainer');const userAvatar=state.profilePicture?`<img src="${state.profilePicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">L</span>`;const aiAvatar=state.bloodinkPicture?`<img src="${state.bloodinkPicture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;border:1px solid var(--accent);">`:`<span style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);border:1px solid var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;">B</span>`;c.innerHTML=chat.messages.map((msg,i)=>`<div class="message ${msg.role}" data-index="${i}"><div class="message-header" style="display:flex;align-items:center;">${msg.role==='user'?userAvatar:aiAvatar}${msg.role==='user'?'Lexi':'Bloodink'}${msg.model&&msg.role==='assistant'?`<span class="msg-model-tag">${esc((MODELS.find(x=>x.id===msg.model)||{}).name||msg.model)}</span>`:''}${msg.pinned?'<span style="margin-left:12px;color:var(--accent);font-size:11px;">pinned</span>':''}${msg.activeMemories?.length?`<span style="margin-left:12px;color:var(--text-muted);font-size:11px;cursor:pointer;" onclick="showMemInfo(${i})">${msg.activeMemories.length} memories</span>`:''}</div>${msg.role==='assistant'&&msg.thinking?thinkBlockHtml(msg.thinking,false,`msg-think-${i}`):''}<div class="message-content" id="msg-content-${i}">${md(msg.content)}</div>${attachmentHtml(msg)}${msg.isSynthesis?'':`<div class="message-actions">${versionNav(msg,i)}<button class="message-action-btn" onclick="cpMsg(${i})">Copy</button>${msg.role==='user'?`<button class="message-action-btn" onclick="editMsg(${i})">Edit</button>`:''}${msg.role==='assistant'&&i===chat.messages.length-1?`<button class="message-action-btn" onclick="regen(${i})">Regenerate</button>`:''}</div>`}</div>`).join('');c.scrollTop=c.scrollHeight;}
+function showPendingThink(){
+  const c=document.getElementById('messagesContainer');if(!c)return;
+  document.getElementById('pendingThink')?.remove();
+  const d=document.createElement('div');d.className='message assistant';d.id='pendingThink';
+  d.innerHTML=`<div class="message-header">Bloodink</div>${thinkBlockHtml('',true)}`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function updateStreamingThink(idx,text,live){
+  const wrap=document.querySelector(`.message[data-index="${idx}"]`);if(!wrap)return;
+  let el=document.getElementById(`msg-think-${idx}`);
+  const wasOpen=el?.open;
+  const tmp=document.createElement('div');tmp.innerHTML=thinkBlockHtml(text,live,`msg-think-${idx}`);
+  const fresh=tmp.firstElementChild;if(!fresh)return;
+  if(wasOpen)fresh.open=true;
+  if(el)el.replaceWith(fresh);else{const content=document.getElementById(`msg-content-${idx}`);if(content)content.before(fresh);}
+  if(wasOpen){const b=fresh.querySelector('.think-body');if(b)b.scrollTop=b.scrollHeight;}
+  if(live){const c=document.getElementById('messagesContainer');c.scrollTop=c.scrollHeight;}
+}
 function updateStreamingMessage(idx,content,done){
   const el=document.getElementById(`msg-content-${idx}`);
   if(!el)return;
@@ -858,19 +1008,20 @@ function versionNav(msg,i){
 function showVersion(i,dir){
   const m=getChat()?.messages[i];if(!m?.versions)return;
   const k=(m.vIdx??m.versions.length-1)+dir;if(k<0||k>=m.versions.length)return;
-  m.vIdx=k;m.content=m.versions[k];getChat().updatedAt=Date.now();renderMessages();saveAndSync();
+  m.vIdx=k;m.content=m.versions[k];if(m.thinkings){if(m.thinkings[k])m.thinking=m.thinkings[k];else delete m.thinking;}getChat().updatedAt=Date.now();renderMessages();saveAndSync();
 }
 window.showVersion=showVersion;
 async function regen(i){
   if(generating){showToast('Stop the reply first');return;}
   const chat=getChat(),old=chat.messages[i];
   const prior=old&&old.role==='assistant'?(old.versions?.length?old.versions.slice():[old.content]):null;
+  const priorT=prior?prior.map((_,j)=>old.thinkings?.[j]??(j===(old.vIdx??prior.length-1)?(old.thinking||''):'')):null;
   chat.messages=chat.messages.slice(0,i);chat.updatedAt=Date.now();renderMessages();saveLocal();
   const before=chat.messages.length;
   await sendMessage(true);
   const added=chat.messages.length>before?chat.messages[chat.messages.length-1]:null;
   if(added&&added.role==='assistant'){
-    if(prior){added.versions=[...prior,added.content];added.vIdx=added.versions.length-1;}
+    if(prior){added.versions=[...prior,added.content];added.vIdx=added.versions.length-1;if(priorT.some(Boolean)||added.thinking)added.thinkings=[...priorT,added.thinking||''];}
   }else if(old){chat.messages.push(old);}   // regenerate failed or was stopped empty: bring the old reply back
   chat.updatedAt=Date.now();renderMessages();saveAndSync();
 }
@@ -1255,10 +1406,12 @@ async function streamCompare(id,k,temp,probe,mems){
   if(mems.length)msgs.push({role:'system',content:`[MEMORIES]\n\n${mems.map(m=>`## ${m.name}\n${m.content}`).join('\n\n---\n\n')}`});
   msgs.push(...smartCtx(temp,probe,mems).map(m=>toApiMessage(m,vision)));
   const ac=new AbortController();compareAborts.push(ac);
-  const out=compareOut[k];
-  const paint=done=>{const el=document.getElementById('cc-body-'+k);if(el&&compareOut[k]===out)el.innerHTML=md(out.text)+(done?'':'<span class="streaming-cursor"></span>');};
+  const out=compareOut[k];out.thinking='';
+  let lastPaint=0;
+  const paint=done=>{const el=document.getElementById('cc-body-'+k);if(!el||compareOut[k]!==out)return;const tb=document.getElementById('cc-think-'+k),wasOpen=tb?.open;el.innerHTML=thinkBlockHtml(out.thinking,!done&&!out.text,'cc-think-'+k)+md(out.text)+(done?'':'<span class="streaming-cursor"></span>');if(wasOpen){const nb=document.getElementById('cc-think-'+k);if(nb)nb.open=true;}};
   try{
-    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:id,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true}),signal:ac.signal});
+    const tp=await thinkParams(id);
+    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(withThinking({model:id,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true},tp)),signal:ac.signal});
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
     const reader=r.body.getReader(),decoder=new TextDecoder();let buffer='';
     while(true){
@@ -1269,12 +1422,15 @@ async function streamCompare(id,k,temp,probe,mems){
         if(!line.startsWith('data: '))continue;const data=line.slice(6);if(data==='[DONE]')continue;
         let parsed;try{parsed=JSON.parse(data);}catch(e){continue;}
         if(parsed.error)throw new Error(parsed.error.message||'Model error');
-        const delta=parsed.choices?.[0]?.delta?.content;
+        const dl=parsed.choices?.[0]?.delta;
+        const th=deltaThinking(dl);
+        if(th){out.thinking+=th;const now=Date.now();if(now-lastPaint>300){lastPaint=now;paint(false);}}
+        const delta=dl?.content;
         if(delta){out.text+=delta;paint(false);}
       }
     }
     out.done=true;
-    if(!out.text.trim())throw new Error('Empty reply');
+    if(!out.text.trim())throw new Error(out.thinking?'Spent its whole budget thinking — try one notch lower':'Empty reply');
     paint(true);
   }catch(e){
     out.done=true;
@@ -1289,7 +1445,8 @@ function useCompare(k){
   if(!out.text.trim()){showToast('Nothing to use yet');return;}
   if(!out.done){showToast('Still writing — wait or stop it first');return;}
   chat.messages.push({role:'user',content:compareText});
-  chat.messages.push({role:'assistant',content:out.text,activeMemories:compareMems,model:out.id});
+  const am={role:'assistant',content:out.text,activeMemories:compareMems,model:out.id};if(out.thinking)am.thinking=out.thinking;
+  chat.messages.push(am);
   chat.updatedAt=Date.now();
   const inp=document.getElementById('inputField');if(inp.value.trim()===compareText)inp.value='';
   closeCompare();renderMessages();saveAndSync();syncSendBtn();
@@ -1307,7 +1464,7 @@ window.copyCompare=copyCompare;
 var generating=false,currentAbort=null;
 const SEND_ICON='<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
 const STOP_ICON='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
-function setGenerating(on){generating=on;const b=document.getElementById('sendButton');
+function setGenerating(on){generating=on;if(!on)document.getElementById('pendingThink')?.remove();const b=document.getElementById('sendButton');
   if(on){b.innerHTML=STOP_ICON;b.title='Stop';b.disabled=false;b.classList.add('stopping');b.onclick=stopGeneration;}
   else{b.innerHTML=SEND_ICON;b.title='Send';b.classList.remove('stopping');b.onclick=()=>sendMessage();currentAbort=null;syncSendBtn();}}
 function stopGeneration(){if(currentAbort)currentAbort.abort();}
@@ -1348,29 +1505,39 @@ async function sendMessage(isRegen=false){
   currentAbort=new AbortController();const signal=currentAbort.signal;let streamMsg=null;
   setGenerating(true);
   try{
+    const tp=await thinkParams(chat.model);
     if(hasFn){
-      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,tools:[MEM_TOOL]};
+      const body=withThinking({model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,tools:[MEM_TOOL]},tp);
+      if(tp.reasoning)showPendingThink(); // a quiet "Thinking…" on screen only — nothing is added to the chat
       const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body),signal});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
       const data=await r.json();
       if(!data.choices?.[0])throw new Error('Invalid response');
       const choice=data.choices[0];
+      const emptyMsg=t=>(model?.name||chat.model)+(t?' spent its whole budget thinking and wrote nothing — try one notch lower on Thinking depth':' sent back an empty reply');
       if(choice.message.tool_calls?.length){
         const tc=choice.message.tool_calls[0];
         if(tc.function.name==='create_memory'){
           const params=JSON.parse(tc.function.arguments),result=mkMem(params);
           msgs.push(choice.message);msgs.push({role:'tool',tool_call_id:tc.id,content:JSON.stringify(result)});
-          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify({model:chat.model,messages:msgs,temperature:state.temperature,max_tokens:16000}),signal});
+          const r2=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(withThinking({model:chat.model,messages:msgs,temperature:state.temperature,max_tokens:16000},tp)),signal});
           const d2=await r2.json();
-          chat.messages.push({role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)});
+          if(!r2.ok||!d2.choices?.[0])throw new Error(d2.error?.message||`API error: ${r2.status}`);
+          const t2=[messageThinking(choice.message),messageThinking(d2.choices[0].message)].filter(Boolean).join('\n\n');
+          if(!String(d2.choices[0].message.content||'').trim())throw new Error(emptyMsg(t2));
+          const am={role:'assistant',content:d2.choices[0].message.content,activeMemories:mems.map(m=>m.name)};if(t2)am.thinking=t2;
+          chat.messages.push(am);
           showToast(`Memory saved: ${params.name}`);
         }
       }else{
-        chat.messages.push({role:'assistant',content:choice.message.content,activeMemories:mems.map(m=>m.name)});
+        const t1=messageThinking(choice.message);
+        if(!String(choice.message.content||'').trim())throw new Error(emptyMsg(t1));
+        const am={role:'assistant',content:choice.message.content,activeMemories:mems.map(m=>m.name)};if(t1)am.thinking=t1;
+        chat.messages.push(am);
       }
       chat.updatedAt=Date.now();renderMessages();saveAndSync();
     } else {
-      const body={model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true};
+      const body=withThinking({model:chat.model,messages:msgs,temperature:state.temperature,repetition_penalty:state.repetitionPenalty,max_tokens:16000,stream:true},tp);
       const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin,'X-Title':'Bloodink'},body:JSON.stringify(body),signal});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API error: ${r.status}`);}
       const assistantMsg={role:'assistant',content:'',activeMemories:mems.map(m=>m.name)};streamMsg=assistantMsg;
@@ -1393,12 +1560,17 @@ async function sendMessage(isRegen=false){
           try{
             const parsed=JSON.parse(data);
             if(parsed.error)throw new Error(parsed.error.message||'Model error');
-            const delta=parsed.choices?.[0]?.delta?.content;
-            if(delta){assistantMsg.content+=delta;updateStreamingMessage(msgIdx,assistantMsg.content,false);}
+            const dl=parsed.choices?.[0]?.delta;
+            const th=deltaThinking(dl);
+            if(th){assistantMsg.thinking=(assistantMsg.thinking||'')+th;const now=Date.now();if(now-(assistantMsg._tp||0)>300){assistantMsg._tp=now;updateStreamingThink(msgIdx,assistantMsg.thinking,!assistantMsg.content);}}
+            const delta=dl?.content;
+            if(delta){if(!assistantMsg.content&&assistantMsg.thinking)updateStreamingThink(msgIdx,assistantMsg.thinking,false);assistantMsg.content+=delta;updateStreamingMessage(msgIdx,assistantMsg.content,false);}
           }catch(e){if(e instanceof SyntaxError)continue;chat.messages.splice(msgIdx,1);throw e;}
         }
       }
-      if(!assistantMsg.content.trim()){chat.messages.splice(msgIdx,1);throw new Error((model?.name||chat.model)+' sent back an empty reply');}
+      if(!assistantMsg.content.trim()){chat.messages.splice(msgIdx,1);throw new Error((model?.name||chat.model)+(assistantMsg.thinking?' spent its whole budget thinking and wrote nothing — try one notch lower on Thinking depth':' sent back an empty reply'));}
+      delete assistantMsg._tp;
+      if(assistantMsg.thinking)updateStreamingThink(msgIdx,assistantMsg.thinking,false);
       updateStreamingMessage(msgIdx,assistantMsg.content,true);
       chat.updatedAt=Date.now();
       saveAndSync();
@@ -1426,11 +1598,11 @@ window.sendMessage=sendMessage;
 
 async function autoName(chat){try{const u=chat.messages.filter(m=>m.role==='user'),a=chat.messages.filter(m=>m.role==='assistant');if(!u.length||!a.length)return;const uc=String(u[0].content||'').slice(0,1500)||(u[0].docs?.[0]?.name||'attachment');const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.apiKey}`,'HTTP-Referer':window.location.origin},body:JSON.stringify({model:'openai/gpt-4o-mini',messages:[{role:'user',content:`Generate a 3-5 word title:\n\nUser: ${uc}\n\nAssistant: ${String(a[0].content||'').slice(0,1500)}\n\nTitle:`}],temperature:0.7,max_tokens:20})});if(r.ok){const d=await r.json(),t=d.choices[0].message.content.trim().replace(/['"]/g,'').substring(0,50);if(t&&t.length>3){chat.title=t;chat.updatedAt=Date.now();renderChatList();saveAndSync();}}}catch(e){}}
 
-function openSettings(){document.getElementById('apiKeyInput').value=state.apiKey;document.getElementById('groqKeyInput').value=state.groqKey;document.getElementById('fbApiKey').value=state.fbApiKey;document.getElementById('fbProjectId').value=state.fbProjectId;document.getElementById('fbAppId').value=state.fbAppId;document.getElementById('fbSyncKey').value=state.fbSyncKey;document.getElementById('systemPromptInput').value=state.systemPrompt;document.getElementById('modelSelect').value=state.model;document.getElementById('temperatureInput').value=state.temperature;document.getElementById('tempValue').textContent=parseFloat(state.temperature).toFixed(3);document.getElementById('repetitionInput').value=state.repetitionPenalty;document.getElementById('repValue').textContent=state.repetitionPenalty;document.getElementById('ctxInput').value=state.ctxSize||20;document.getElementById('ctxValue').textContent=state.ctxSize||20;document.getElementById('recentCtxInput').value=state.recentCtx||12;document.getElementById('recentCtxValue').textContent=state.recentCtx||12;document.getElementById('synthInput').value=state.synthFreq||10;document.getElementById('synthValue').textContent=state.synthFreq||10;document.getElementById('settingsModal').classList.add('visible');}
+function openSettings(){document.getElementById('apiKeyInput').value=state.apiKey;document.getElementById('groqKeyInput').value=state.groqKey;document.getElementById('fbApiKey').value=state.fbApiKey;document.getElementById('fbProjectId').value=state.fbProjectId;document.getElementById('fbAppId').value=state.fbAppId;document.getElementById('fbSyncKey').value=state.fbSyncKey;document.getElementById('systemPromptInput').value=state.systemPrompt;document.getElementById('modelSelect').value=state.model;document.getElementById('temperatureInput').value=state.temperature;document.getElementById('tempValue').textContent=parseFloat(state.temperature).toFixed(3);document.getElementById('repetitionInput').value=state.repetitionPenalty;document.getElementById('repValue').textContent=state.repetitionPenalty;document.getElementById('ctxInput').value=state.ctxSize||20;document.getElementById('ctxValue').textContent=state.ctxSize||20;document.getElementById('recentCtxInput').value=state.recentCtx||12;document.getElementById('recentCtxValue').textContent=state.recentCtx||12;document.getElementById('synthInput').value=state.synthFreq||10;document.getElementById('synthValue').textContent=state.synthFreq||10;document.getElementById('thinkInput').value=Math.max(0,THINK_LEVELS.findIndex(l=>l.key===(state.thinkLevel||'default')));updateThinkNote();loadModelInfo();document.getElementById('settingsModal').classList.add('visible');}
 window.openSettings=openSettings;
 function closeSettings(){document.getElementById('settingsModal').classList.remove('visible');}
 window.closeSettings=closeSettings;
-function saveSettings(){const hadFb=!!state.fbApiKey;state.apiKey=document.getElementById('apiKeyInput').value.trim();state.groqKey=document.getElementById('groqKeyInput').value.trim();state.fbApiKey=document.getElementById('fbApiKey').value.trim();state.fbProjectId=document.getElementById('fbProjectId').value.trim();state.fbAppId=document.getElementById('fbAppId').value.trim();state.fbSyncKey=document.getElementById('fbSyncKey').value.trim();state.systemPrompt=document.getElementById('systemPromptInput').value.trim();state.model=document.getElementById('modelSelect').value;state.temperature=parseFloat(document.getElementById('temperatureInput').value);state.repetitionPenalty=parseFloat(document.getElementById('repetitionInput').value);state.ctxSize=parseInt(document.getElementById('ctxInput').value);state.recentCtx=parseInt(document.getElementById('recentCtxInput').value);state.synthFreq=parseInt(document.getElementById('synthInput').value);const chat=getChat();if(chat)chat.model=state.model;saveLocal();closeSettings();showToast('Settings saved');if(state.fbApiKey&&(!hadFb||!db))initFirebase();else if(state.fbSyncKey&&db)listenRealtime();updateQuickModelSwitch();}
+function saveSettings(){const hadFb=!!state.fbApiKey;state.apiKey=document.getElementById('apiKeyInput').value.trim();state.groqKey=document.getElementById('groqKeyInput').value.trim();state.fbApiKey=document.getElementById('fbApiKey').value.trim();state.fbProjectId=document.getElementById('fbProjectId').value.trim();state.fbAppId=document.getElementById('fbAppId').value.trim();state.fbSyncKey=document.getElementById('fbSyncKey').value.trim();state.systemPrompt=document.getElementById('systemPromptInput').value.trim();state.model=document.getElementById('modelSelect').value;state.temperature=parseFloat(document.getElementById('temperatureInput').value);state.repetitionPenalty=parseFloat(document.getElementById('repetitionInput').value);state.ctxSize=parseInt(document.getElementById('ctxInput').value);state.recentCtx=parseInt(document.getElementById('recentCtxInput').value);state.synthFreq=parseInt(document.getElementById('synthInput').value);state.thinkLevel=(THINK_LEVELS[parseInt(document.getElementById('thinkInput').value)]||THINK_LEVELS[1]).key;const chat=getChat();if(chat)chat.model=state.model;saveLocal();closeSettings();showToast('Settings saved');if(state.fbApiKey&&(!hadFb||!db))initFirebase();else if(state.fbSyncKey&&db)listenRealtime();updateQuickModelSwitch();}
 window.saveSettings=saveSettings;
 function populateModelSelect(){const g={};MODELS.forEach(m=>{if(!g[m.provider])g[m.provider]=[];g[m.provider].push(m);});document.getElementById('modelSelect').innerHTML=Object.entries(g).map(([p,ms])=>`<optgroup label="${p}">${ms.map(m=>`<option value="${m.id}" ${!m.hasFn?'style="color:#c7a853;"':''}>${m.name}${m.vision?' 👁':''}${!m.hasFn?' ⚠':''}</option>`).join('')}</optgroup>`).join('');}
 
@@ -1701,7 +1873,7 @@ window.toggleSidebar=toggleSidebar;
 // Settings stay in localStorage; chats/memories/projects live in IndexedDB,
 // which has no 5MB cap — room for tens of thousands of conversations.
 const DB_NAME='bloodink',DB_STORE='kv',LS_KEY='bloodink_v4',LS_SETTINGS='bloodink_v4_settings';
-const SETTING_KEYS=['apiKey','groqKey','fbApiKey','fbProjectId','fbAppId','fbSyncKey','systemPrompt','model','theme','maxMemories','temperature','repetitionPenalty','ctxSize','recentCtx','synthFreq','activeProjectId','activeChatId','isFirstLaunch','profilePicture','bloodinkPicture','avatarsAt'];
+const SETTING_KEYS=['apiKey','groqKey','fbApiKey','fbProjectId','fbAppId','fbSyncKey','systemPrompt','model','theme','maxMemories','temperature','repetitionPenalty','ctxSize','recentCtx','synthFreq','thinkLevel','activeProjectId','activeChatId','isFirstLaunch','profilePicture','bloodinkPicture','avatarsAt'];
 let storageReady=false,saveTimer=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(DB_STORE))r.result.createObjectStore(DB_STORE);};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
